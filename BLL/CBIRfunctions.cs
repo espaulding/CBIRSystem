@@ -9,6 +9,64 @@ namespace CBIR
 {
     static public class CBIRfunctions
     {
+        #region preprocessdata
+
+        //This function finds the color histograms for each picture as necessary
+        //and then calculats the distance that each picture is from the query image
+        public static ArrayList calculatePictures(string imageFoldPath, string HISTOGRAM_FILE, string qFilename)
+        {
+            ArrayList list = new ArrayList();
+            bool histogramFileUPdated = false; //keep track if we update the histogram db by adding or removing an image file
+
+            DirectoryInfo d = new DirectoryInfo(imageFoldPath); //get all pictures in the path
+            string dbFile = imageFoldPath + "\\" + HISTOGRAM_FILE;
+
+            HistogramDB db = null;
+            //read the existing histogram file if there is one
+            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); }
+            else { db = new HistogramDB(); }
+
+            //make sure the query image is in the db first
+            if (!db.sizeDB.ContainsKey(qFilename))
+            {
+                Bitmap picture = (Bitmap)Bitmap.FromFile(imageFoldPath + "\\" + qFilename);
+                db.Add(qFilename, 0L, CBIRfunctions.CalcIntensityHist(picture), CBIRfunctions.CalcColorCodeHist(picture));
+                picture.Dispose();
+            }
+
+            foreach (var file in d.GetFiles("*.jpg"))
+            {
+                //look the file up in the current histogram data
+                if (db.sizeDB.ContainsKey(file.Name) && !(db.sizeDB[file.Name] == file.Length))
+                { //we've seen this image before
+                    db.Remove(file.Name); //the file changed size so delete it from our DB 
+                }
+
+                if (!db.sizeDB.ContainsKey(file.Name))
+                { //we've never seen this image or we just removed it
+                    histogramFileUPdated = true;        //so process it from scratch and add to the db
+                    Bitmap picture = (Bitmap)Bitmap.FromFile(file.FullName);
+                    ArrayList intensityHist = CBIRfunctions.CalcIntensityHist(picture);
+                    ArrayList colorCodeHist = CBIRfunctions.CalcColorCodeHist(picture);
+                    db.Add(file.Name, file.Length, intensityHist, colorCodeHist);
+                    picture.Dispose();
+                }
+
+                PictureClass pic = new PictureClass(file.Name, file.FullName, file.Length,
+                 calculateDist(db.intensityDB[qFilename], db.intensityDB[file.Name]),
+                 calculateDist(db.colorCodeDB[qFilename], db.colorCodeDB[file.Name]));
+                list.Add(pic);
+            }
+
+            //changes were made to the histogram data so save over the old stuff
+            if (histogramFileUPdated) { HF.Serialize(dbFile, db); }
+            return list;
+        }
+
+        #endregion
+
+        #region generatefeatures
+
         //get the texture features
         //they are always in the order: Energy, Entropy, Contrast
         static public ArrayList CalcTextureFeatures(Bitmap myImg, int dr, int dc)
@@ -67,11 +125,13 @@ namespace CBIR
             return NormalizeBySize(hist, myImg.Width * myImg.Height);
         }
 
-        //p = 1 is manhattan distance function
-        //p = 2 is euclidean distance function
-        //p = higher increases side-effects between dimensions
-        //TODO: update generalized dist function
-        public static double calculateDist(ArrayList Qhistogram, ArrayList histogram){
+        #endregion
+
+        #region helperfunctions
+
+        // manhattan distance function
+        public static double calculateDist(ArrayList Qhistogram, ArrayList histogram)
+        {
             double distance = 0.0;
             if (Qhistogram.Count != histogram.Count) { throw new Exception("invalid histograms given to distance measure."); }
             for (int bin = 0; bin < histogram.Count; bin++){
@@ -80,58 +140,19 @@ namespace CBIR
             return distance;
         }
 
-        #region preprocessdata
-
-        //This function finds the color histograms for each picture as necessary
-        //and then calculats the distance that each picture is from the query image
-        public static ArrayList calculatePictures(string imageFoldPath, string HISTOGRAM_FILE, string qFilename){
-            ArrayList list = new ArrayList();
-            bool histogramFileUPdated = false; //keep track if we update the histogram db by adding or removing an image file
-
-            DirectoryInfo d = new DirectoryInfo(imageFoldPath); //get all pictures in the path
-            string dbFile = imageFoldPath + "\\" + HISTOGRAM_FILE;
-
-            HistogramDB db = null;
-            //read the existing histogram file if there is one
-            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); }
-            else { db = new HistogramDB(); }
-
-            //make sure the query image is in the db first
-            if (!db.sizeDB.ContainsKey(qFilename)){
-                Bitmap picture = (Bitmap)Bitmap.FromFile(imageFoldPath + "\\" + qFilename);
-                db.Add(qFilename, 0L, CBIRfunctions.CalcIntensityHist(picture), CBIRfunctions.CalcColorCodeHist(picture));
-                picture.Dispose();
+        //p = 1 is manhattan distance function
+        //p = 2 is euclidean distance function
+        //p = higher increases side-effects between dimensions
+        public static double calculateDist(ArrayList Qhistogram, ArrayList histogram, int p)
+        {
+            double distance = 0.0;
+            if (Qhistogram.Count != histogram.Count) { throw new Exception("invalid histograms given to distance measure."); }
+            for (int bin = 0; bin < histogram.Count; bin++)
+            {
+                distance += Math.Pow(Math.Abs((double)Qhistogram[bin] - (double)histogram[bin]),p);
             }
-
-            foreach (var file in d.GetFiles("*.jpg")){
-                //look the file up in the current histogram data
-                if (db.sizeDB.ContainsKey(file.Name) && !(db.sizeDB[file.Name] == file.Length)){ //we've seen this image before
-                    db.Remove(file.Name); //the file changed size so delete it from our DB 
-                }
-
-                if (!db.sizeDB.ContainsKey(file.Name)){ //we've never seen this image or we just removed it
-                    histogramFileUPdated = true;        //so process it from scratch and add to the db
-                    Bitmap picture = (Bitmap)Bitmap.FromFile(file.FullName);
-                    ArrayList intensityHist = CBIRfunctions.CalcIntensityHist(picture);
-                    ArrayList colorCodeHist = CBIRfunctions.CalcColorCodeHist(picture);
-                    db.Add(file.Name, file.Length, intensityHist, colorCodeHist);
-                    picture.Dispose();
-                }
-
-                PictureClass pic = new PictureClass(file.Name, file.FullName, file.Length,
-                 calculateDist(db.intensityDB[qFilename], db.intensityDB[file.Name]),
-                 calculateDist(db.colorCodeDB[qFilename], db.colorCodeDB[file.Name]));
-                list.Add(pic);
-            }
-
-            //changes were made to the histogram data so save over the old stuff
-            if (histogramFileUPdated) { HF.Serialize(dbFile, db); }
-            return list;
+            return Math.Pow(distance,(double)(1.0)/p);
         }
-
-        #endregion
-
-        #region helperfunctions
 
         //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the energy
         static public double CalcEnergy(Dictionary<int, Dictionary<int, double>> ngtcom)
