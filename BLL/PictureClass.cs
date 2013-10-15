@@ -1,9 +1,5 @@
 ﻿//This class is used to hold informatio about every picture in the database
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Collections;
 
 namespace CBIR
 {

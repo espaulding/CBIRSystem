@@ -1,0 +1,9 @@
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\bin\Release\CBIR.exe
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\bin\Release\CBIR.pdb
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.frmDisplayPicture.resources
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.frmSearch.resources
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.Properties.Resources.resources
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.ResultofSearch.resources
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIRSystem.csproj.GenerateResource.Cache
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.exe
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.pdb

@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CBIR.ProgramLauncher</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -72,6 +75,8 @@
     <Compile Include="BLL\PictureClass.cs" />
     <Compile Include="ProgramLauncher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTests\CBIRTests.cs" />
+    <Compile Include="UnitTests\TestMaster.cs" />
     <EmbeddedResource Include="GUI\frmDisplayPicture.resx">
       <DependentUpon>frmDisplayPicture.cs</DependentUpon>
     </EmbeddedResource>
@@ -106,6 +111,9 @@
     <Compile Include="GUI\ResultofSearch.designer.cs">
       <DependentUpon>ResultofSearch.cs</DependentUpon>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\testImage.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

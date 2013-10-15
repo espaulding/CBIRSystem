@@ -16,3 +16,4 @@ C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.frmSearch.resources
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.Properties.Resources.resources
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.ResultofSearch.resources
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIRSystem.csproj.GenerateResource.Cache
+C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIRSystem.csprojResolveAssemblyReference.cache

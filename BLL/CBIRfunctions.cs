@@ -1,22 +1,29 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.Collections;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CBIR
 {
     static public class CBIRfunctions
     {
-        static public ArrayList IntensityMethod(Bitmap myImg){
-            Color p;
+        //get the texture features
+        //they are always in the order: Energy, Entropy, Contrast
+        static public ArrayList CalcTextureFeatures(Bitmap myImg, int dr, int dc)
+        {
+            Dictionary<int, Dictionary<int, double>> ngtcom = CalcGrayTone(CalcCoOccurrence(myImg, dr, dc));
+            ArrayList hist = new ArrayList(3);
+            hist.Add(CalcEnergy(ngtcom));
+            hist.Add(CalcEntropy(ngtcom));
+            hist.Add(CalcContrast(ngtcom));
+            
+            return hist;
+        }
+
+        //get the intensity histogram
+        static public ArrayList CalcIntensityHist(Bitmap myImg){
             double I;
             int intensity, numBins = 25;
             ArrayList hist = new ArrayList(numBins);
@@ -24,23 +31,18 @@ namespace CBIR
 
             for (int x = 0; x < myImg.Width; x++){
                 for (int y = 0; y < myImg.Height; y++){
-                    p = myImg.GetPixel(x, y);
-                    I = (.299 * p.R) + (.587 * p.G) + (.114 * p.B);
+                    I = CalcIntensity(myImg.GetPixel(x, y));
                     intensity = (int)Math.Floor(I / 10);
                     if (intensity > (numBins - 1)) { intensity = numBins - 1; } //don't let 250 and up move out of the histogram
                     hist[intensity] = (double)hist[intensity] + 1.0;
                 }
             }
 
-            //normalize bins to account for images of different sizes
-            for (int bin = 0; bin < hist.Count; bin++){
-                hist[bin] = (double)hist[bin] / (myImg.Width * myImg.Height);
-            }
-
-            return hist;
+            return NormalizeBySize(hist, myImg.Width * myImg.Height);
         }
 
-        static public ArrayList ColorCodeMethod(Bitmap myImg){
+        //get the color-code histogram
+        static public ArrayList CalcColorCodeHist(Bitmap myImg){
             Color p;
             int numBins = 64;
             ArrayList hist = new ArrayList(numBins);
@@ -62,15 +64,13 @@ namespace CBIR
                 }
             }
 
-            //normalize bins to account for images of different sizes
-            for (bin = 0; bin < hist.Count; bin++){
-                hist[bin] = (double)hist[bin] / (myImg.Width * myImg.Height);
-            }
-
-            return hist;
+            return NormalizeBySize(hist, myImg.Width * myImg.Height);
         }
 
-        //manhattan distance function
+        //p = 1 is manhattan distance function
+        //p = 2 is euclidean distance function
+        //p = higher increases side-effects between dimensions
+        //TODO: update generalized dist function
         public static double calculateDist(ArrayList Qhistogram, ArrayList histogram){
             double distance = 0.0;
             if (Qhistogram.Count != histogram.Count) { throw new Exception("invalid histograms given to distance measure."); }
@@ -79,6 +79,8 @@ namespace CBIR
             }
             return distance;
         }
+
+        #region preprocessdata
 
         //This function finds the color histograms for each picture as necessary
         //and then calculats the distance that each picture is from the query image
@@ -97,7 +99,7 @@ namespace CBIR
             //make sure the query image is in the db first
             if (!db.sizeDB.ContainsKey(qFilename)){
                 Bitmap picture = (Bitmap)Bitmap.FromFile(imageFoldPath + "\\" + qFilename);
-                db.Add(qFilename, 0L, CBIRfunctions.IntensityMethod(picture), CBIRfunctions.ColorCodeMethod(picture));
+                db.Add(qFilename, 0L, CBIRfunctions.CalcIntensityHist(picture), CBIRfunctions.CalcColorCodeHist(picture));
                 picture.Dispose();
             }
 
@@ -110,8 +112,8 @@ namespace CBIR
                 if (!db.sizeDB.ContainsKey(file.Name)){ //we've never seen this image or we just removed it
                     histogramFileUPdated = true;        //so process it from scratch and add to the db
                     Bitmap picture = (Bitmap)Bitmap.FromFile(file.FullName);
-                    ArrayList intensityHist = CBIRfunctions.IntensityMethod(picture);
-                    ArrayList colorCodeHist = CBIRfunctions.ColorCodeMethod(picture);
+                    ArrayList intensityHist = CBIRfunctions.CalcIntensityHist(picture);
+                    ArrayList colorCodeHist = CBIRfunctions.CalcColorCodeHist(picture);
                     db.Add(file.Name, file.Length, intensityHist, colorCodeHist);
                     picture.Dispose();
                 }
@@ -126,5 +128,161 @@ namespace CBIR
             if (histogramFileUPdated) { HF.Serialize(dbFile, db); }
             return list;
         }
+
+        #endregion
+
+        #region helperfunctions
+
+        //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the energy
+        static public double CalcEnergy(Dictionary<int, Dictionary<int, double>> ngtcom)
+        {
+            double energy = 0;
+            foreach (KeyValuePair<int, Dictionary<int, double>> row in ngtcom){
+                foreach (KeyValuePair<int, double> col in row.Value)
+                {
+                    energy += Math.Pow(col.Value,2); //N^2
+                }
+            }
+
+            return energy;
+        }
+
+        //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the entropy
+        static public double CalcEntropy(Dictionary<int, Dictionary<int, double>> ngtcom)
+        {
+            double entropy = 0;
+            foreach (KeyValuePair<int, Dictionary<int, double>> row in ngtcom){
+                foreach (KeyValuePair<int, double> col in row.Value){
+                    if (col.Value != 0) { entropy += col.Value * Math.Log(col.Value, 2); } //N Log N with log base 2
+                }
+            }
+
+            return entropy;
+        }
+
+        //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the entropy
+        static public double CalcContrast(Dictionary<int, Dictionary<int, double>> ngtcom)
+        {
+            double contrast = 0;
+            foreach (KeyValuePair<int, Dictionary<int, double>> row in ngtcom){
+                foreach (KeyValuePair<int, double> col in row.Value){
+                    contrast += Math.Pow(row.Key - col.Key, 2) * col.Value; //(i - j)^2 N
+                }
+            }
+
+            return contrast;
+        }
+
+        //find an intensity given RGB values
+        static public double CalcIntensity(Color p)
+        {
+            return (.299 * p.R) + (.587 * p.G) + (.114 * p.B);
+        }
+
+        //given an image and a displacement vector (dr,dc) find the co-occurrence matrix
+        //the upper left corner of the image is (0,0)
+        //dr is the displacement rows downward
+        //dc is the displacement columns to the right
+        static public Dictionary<int, Dictionary<int, double>> CalcCoOccurrence(Bitmap Img, int dr, int dc)
+        {
+            int[][] image = new int[Img.Height][]; //initalize matrix of intensity values
+            for (int r = 0; r < Img.Height; r++) { image[r] = new int[Img.Width]; }
+
+            //build intensity matrix
+            for (int r = 0; r < Img.Height; r++){for (int c = 0; c < Img.Width; c++){
+                image[r][c] = (int)CalcIntensity(Img.GetPixel(c, r));
+            }}
+
+            //for checking against the assignment
+            //int[][] image = new int[][] {new int[]{2,2,0,0},
+            //                             new int[]{2,2,0,0},
+            //                             new int[]{0,0,3,3},
+            //                             new int[]{0,0,3,3}};
+
+            //grab a sorted list of unique intensity values from the image
+            int[] values = image.SelectMany(value => value).Distinct().OrderBy(value => value).ToArray();
+
+            //initalize a hash of hashes to hold the texture counts
+            Dictionary<int,Dictionary<int,double>> counts = new Dictionary<int,Dictionary<int,double>>();
+            foreach(int v in values){
+                counts.Add(v,new Dictionary<int,double>());
+                foreach(int va in values){
+                    counts[v].Add(va,0.0);
+                }
+            }
+
+            //update counts using the displacement vector
+            for (int r = 0; r < image.Length-dr; r++) { for (int c = 0; c < image[0].Length-dc; c++) {
+                counts[image[r][c]][image[r+dr][c+dc]]++;
+            }}
+
+            return counts;
+        }
+
+        static public Dictionary<int, Dictionary<int, double>> CalcGrayTone(Dictionary<int, Dictionary<int, double>> com)
+        {
+            //sum up all the values in the co-occurrence matrix
+            double sum = com.Sum(kvpRow => kvpRow.Value.Sum(kvpCol => kvpCol.Value));
+
+            //initalize a hash of hashes for the normalized gray tone matrix
+            Dictionary<int, Dictionary<int, double>> gray = new Dictionary<int, Dictionary<int, double>>();
+
+            //normalize each value by the sum. i.e. uniform distribution
+            foreach (KeyValuePair<int, Dictionary<int, double>> row in com){
+                gray.Add(row.Key, new Dictionary<int, double>());
+                foreach (KeyValuePair<int, double> col in row.Value){
+                    gray[row.Key][col.Key] = col.Value / sum;
+                }
+            }
+
+            return gray;
+        }
+
+        //will normalize so that each feature in the list is a percent between [0,1)
+        //the entire vector will sum to 1 afterwards
+        static public ArrayList NormalizeBySize(ArrayList features, int N)
+        {
+            //normalize bins by divding by the number of pixels
+            //to account for images of different sizes
+            for (int f = 0; f < features.Count; f++){
+                features[f] = (double)features[f] / N;
+            }
+            return features;
+        }
+
+        //normlize the vector so that each feature is between [0,1]
+        static public ArrayList NormalizeUniform(ArrayList features)
+        {
+            double min = features.OfType<double>().Min();
+            double max = features.OfType<double>().Max();
+
+            for (int f = 0; f < features.Count; f++){
+                features[f] = ((double)features[f] - min) / (max - min);
+            }
+            return features;
+        }
+
+        //Intra-Normalization step
+        //normlize the vector so that each feature is between [0,1]
+        static public ArrayList NormalizeGaussian(ArrayList features)
+        {
+            // standard deviation is sqrt(sum(value - mean) / N) where N is number of items in the vector
+            // see http://en.wikipedia.org/wiki/Standard_deviation#Discrete_random_variable for any questions
+
+            double avg = features.OfType<double>().Average(); //find the mean
+            double sum = features.OfType<double>().Sum(f => (f - avg) * (f - avg)); //get the numerator for std dev
+            double stddev = Math.Sqrt(sum / features.Count);
+
+            //apply normalization
+            for (int f = 0; f < features.Count; f++) {
+                features[f] = ((double)features[f] - avg) / (stddev);
+            }
+            return features;
+        }
+
+        //Inter-Normalization step
+        //see equations 14, 15, 16, 17
+
+        #endregion
     }
 }
