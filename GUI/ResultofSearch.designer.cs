@@ -53,6 +53,11 @@
             this.pictureBox19 = new System.Windows.Forms.PictureBox();
             this.pictureBox20 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cbTextureContrast = new System.Windows.Forms.CheckBox();
+            this.cbTextureEntropy = new System.Windows.Forms.CheckBox();
+            this.cbTextureEnergy = new System.Windows.Forms.CheckBox();
+            this.cbColorCode = new System.Windows.Forms.CheckBox();
+            this.cbIntensity = new System.Windows.Forms.CheckBox();
             this.btnChangeQuery = new System.Windows.Forms.Button();
             this.pbQueryPicture = new System.Windows.Forms.PictureBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -62,11 +67,8 @@
             this.rbEuclidean = new System.Windows.Forms.RadioButton();
             this.rbManhattan = new System.Windows.Forms.RadioButton();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.cbIntensity = new System.Windows.Forms.CheckBox();
-            this.cbColorCode = new System.Windows.Forms.CheckBox();
-            this.cbTextureEnergy = new System.Windows.Forms.CheckBox();
-            this.cbTextureEntropy = new System.Windows.Forms.CheckBox();
-            this.cbTextureContrast = new System.Windows.Forms.CheckBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.cbRelevanceFeedback = new System.Windows.Forms.CheckBox();
             this.pnlGallery.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox01)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox02)).BeginInit();
@@ -93,6 +95,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // Previous
@@ -181,7 +184,7 @@
             // 
             this.pictureBox02.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox02.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox02.Location = new System.Drawing.Point(153, 6);
+            this.pictureBox02.Location = new System.Drawing.Point(152, 6);
             this.pictureBox02.Name = "pictureBox02";
             this.pictureBox02.Size = new System.Drawing.Size(137, 144);
             this.pictureBox02.TabIndex = 1;
@@ -192,7 +195,7 @@
             // 
             this.pictureBox03.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox03.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox03.Location = new System.Drawing.Point(300, 6);
+            this.pictureBox03.Location = new System.Drawing.Point(298, 6);
             this.pictureBox03.Name = "pictureBox03";
             this.pictureBox03.Size = new System.Drawing.Size(137, 144);
             this.pictureBox03.TabIndex = 2;
@@ -203,7 +206,7 @@
             // 
             this.pictureBox04.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox04.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox04.Location = new System.Drawing.Point(447, 6);
+            this.pictureBox04.Location = new System.Drawing.Point(444, 6);
             this.pictureBox04.Name = "pictureBox04";
             this.pictureBox04.Size = new System.Drawing.Size(137, 144);
             this.pictureBox04.TabIndex = 3;
@@ -214,7 +217,7 @@
             // 
             this.pictureBox05.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox05.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox05.Location = new System.Drawing.Point(596, 6);
+            this.pictureBox05.Location = new System.Drawing.Point(591, 6);
             this.pictureBox05.Name = "pictureBox05";
             this.pictureBox05.Size = new System.Drawing.Size(138, 144);
             this.pictureBox05.TabIndex = 4;
@@ -236,7 +239,7 @@
             // 
             this.pictureBox07.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox07.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox07.Location = new System.Drawing.Point(153, 159);
+            this.pictureBox07.Location = new System.Drawing.Point(152, 159);
             this.pictureBox07.Name = "pictureBox07";
             this.pictureBox07.Size = new System.Drawing.Size(137, 144);
             this.pictureBox07.TabIndex = 6;
@@ -247,7 +250,7 @@
             // 
             this.pictureBox08.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox08.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox08.Location = new System.Drawing.Point(300, 159);
+            this.pictureBox08.Location = new System.Drawing.Point(298, 159);
             this.pictureBox08.Name = "pictureBox08";
             this.pictureBox08.Size = new System.Drawing.Size(137, 144);
             this.pictureBox08.TabIndex = 7;
@@ -258,7 +261,7 @@
             // 
             this.pictureBox09.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox09.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox09.Location = new System.Drawing.Point(447, 159);
+            this.pictureBox09.Location = new System.Drawing.Point(444, 159);
             this.pictureBox09.Name = "pictureBox09";
             this.pictureBox09.Size = new System.Drawing.Size(137, 144);
             this.pictureBox09.TabIndex = 8;
@@ -269,7 +272,7 @@
             // 
             this.pictureBox10.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox10.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox10.Location = new System.Drawing.Point(596, 159);
+            this.pictureBox10.Location = new System.Drawing.Point(591, 159);
             this.pictureBox10.Name = "pictureBox10";
             this.pictureBox10.Size = new System.Drawing.Size(138, 144);
             this.pictureBox10.TabIndex = 9;
@@ -291,7 +294,7 @@
             // 
             this.pictureBox12.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox12.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox12.Location = new System.Drawing.Point(153, 312);
+            this.pictureBox12.Location = new System.Drawing.Point(152, 312);
             this.pictureBox12.Name = "pictureBox12";
             this.pictureBox12.Size = new System.Drawing.Size(137, 144);
             this.pictureBox12.TabIndex = 11;
@@ -302,7 +305,7 @@
             // 
             this.pictureBox13.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox13.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox13.Location = new System.Drawing.Point(300, 312);
+            this.pictureBox13.Location = new System.Drawing.Point(298, 312);
             this.pictureBox13.Name = "pictureBox13";
             this.pictureBox13.Size = new System.Drawing.Size(137, 144);
             this.pictureBox13.TabIndex = 12;
@@ -313,7 +316,7 @@
             // 
             this.pictureBox14.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox14.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox14.Location = new System.Drawing.Point(447, 312);
+            this.pictureBox14.Location = new System.Drawing.Point(444, 312);
             this.pictureBox14.Name = "pictureBox14";
             this.pictureBox14.Size = new System.Drawing.Size(137, 144);
             this.pictureBox14.TabIndex = 13;
@@ -324,7 +327,7 @@
             // 
             this.pictureBox15.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox15.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox15.Location = new System.Drawing.Point(596, 312);
+            this.pictureBox15.Location = new System.Drawing.Point(591, 312);
             this.pictureBox15.Name = "pictureBox15";
             this.pictureBox15.Size = new System.Drawing.Size(138, 144);
             this.pictureBox15.TabIndex = 14;
@@ -346,7 +349,7 @@
             // 
             this.pictureBox17.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox17.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox17.Location = new System.Drawing.Point(153, 465);
+            this.pictureBox17.Location = new System.Drawing.Point(152, 465);
             this.pictureBox17.Name = "pictureBox17";
             this.pictureBox17.Size = new System.Drawing.Size(137, 144);
             this.pictureBox17.TabIndex = 16;
@@ -357,7 +360,7 @@
             // 
             this.pictureBox18.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox18.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox18.Location = new System.Drawing.Point(300, 465);
+            this.pictureBox18.Location = new System.Drawing.Point(298, 465);
             this.pictureBox18.Name = "pictureBox18";
             this.pictureBox18.Size = new System.Drawing.Size(137, 144);
             this.pictureBox18.TabIndex = 17;
@@ -368,7 +371,7 @@
             // 
             this.pictureBox19.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox19.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox19.Location = new System.Drawing.Point(447, 465);
+            this.pictureBox19.Location = new System.Drawing.Point(444, 465);
             this.pictureBox19.Name = "pictureBox19";
             this.pictureBox19.Size = new System.Drawing.Size(137, 144);
             this.pictureBox19.TabIndex = 18;
@@ -379,7 +382,7 @@
             // 
             this.pictureBox20.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox20.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox20.Location = new System.Drawing.Point(596, 465);
+            this.pictureBox20.Location = new System.Drawing.Point(591, 465);
             this.pictureBox20.Name = "pictureBox20";
             this.pictureBox20.Size = new System.Drawing.Size(138, 144);
             this.pictureBox20.TabIndex = 19;
@@ -399,6 +402,56 @@
             this.groupBox1.TabIndex = 25;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Features to Compare";
+            // 
+            // cbTextureContrast
+            // 
+            this.cbTextureContrast.AutoSize = true;
+            this.cbTextureContrast.Location = new System.Drawing.Point(17, 134);
+            this.cbTextureContrast.Name = "cbTextureContrast";
+            this.cbTextureContrast.Size = new System.Drawing.Size(104, 17);
+            this.cbTextureContrast.TabIndex = 4;
+            this.cbTextureContrast.Text = "Texture Contrast";
+            this.cbTextureContrast.UseVisualStyleBackColor = true;
+            // 
+            // cbTextureEntropy
+            // 
+            this.cbTextureEntropy.AutoSize = true;
+            this.cbTextureEntropy.Location = new System.Drawing.Point(17, 106);
+            this.cbTextureEntropy.Name = "cbTextureEntropy";
+            this.cbTextureEntropy.Size = new System.Drawing.Size(101, 17);
+            this.cbTextureEntropy.TabIndex = 3;
+            this.cbTextureEntropy.Text = "Texture Entropy";
+            this.cbTextureEntropy.UseVisualStyleBackColor = true;
+            // 
+            // cbTextureEnergy
+            // 
+            this.cbTextureEnergy.AutoSize = true;
+            this.cbTextureEnergy.Location = new System.Drawing.Point(17, 78);
+            this.cbTextureEnergy.Name = "cbTextureEnergy";
+            this.cbTextureEnergy.Size = new System.Drawing.Size(98, 17);
+            this.cbTextureEnergy.TabIndex = 2;
+            this.cbTextureEnergy.Text = "Texture Energy";
+            this.cbTextureEnergy.UseVisualStyleBackColor = true;
+            // 
+            // cbColorCode
+            // 
+            this.cbColorCode.AutoSize = true;
+            this.cbColorCode.Location = new System.Drawing.Point(17, 50);
+            this.cbColorCode.Name = "cbColorCode";
+            this.cbColorCode.Size = new System.Drawing.Size(128, 17);
+            this.cbColorCode.TabIndex = 1;
+            this.cbColorCode.Text = "Color-Code Histogram";
+            this.cbColorCode.UseVisualStyleBackColor = true;
+            // 
+            // cbIntensity
+            // 
+            this.cbIntensity.AutoSize = true;
+            this.cbIntensity.Location = new System.Drawing.Point(17, 22);
+            this.cbIntensity.Name = "cbIntensity";
+            this.cbIntensity.Size = new System.Drawing.Size(115, 17);
+            this.cbIntensity.TabIndex = 0;
+            this.cbIntensity.Text = "Intensity Histogram";
+            this.cbIntensity.UseVisualStyleBackColor = true;
             // 
             // btnChangeQuery
             // 
@@ -454,7 +507,7 @@
             this.groupBox3.Controls.Add(this.rbManhattan);
             this.groupBox3.Location = new System.Drawing.Point(367, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(229, 124);
+            this.groupBox3.Size = new System.Drawing.Size(229, 76);
             this.groupBox3.TabIndex = 29;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Distance Methods";
@@ -462,7 +515,7 @@
             // rbEuclidean
             // 
             this.rbEuclidean.AutoSize = true;
-            this.rbEuclidean.Location = new System.Drawing.Point(21, 69);
+            this.rbEuclidean.Location = new System.Drawing.Point(39, 48);
             this.rbEuclidean.Name = "rbEuclidean";
             this.rbEuclidean.Size = new System.Drawing.Size(117, 17);
             this.rbEuclidean.TabIndex = 1;
@@ -474,7 +527,7 @@
             // rbManhattan
             // 
             this.rbManhattan.AutoSize = true;
-            this.rbManhattan.Location = new System.Drawing.Point(21, 38);
+            this.rbManhattan.Location = new System.Drawing.Point(39, 22);
             this.rbManhattan.Name = "rbManhattan";
             this.rbManhattan.Size = new System.Drawing.Size(121, 17);
             this.rbManhattan.TabIndex = 0;
@@ -493,55 +546,25 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Query Results";
             // 
-            // cbIntensity
+            // groupBox5
             // 
-            this.cbIntensity.AutoSize = true;
-            this.cbIntensity.Location = new System.Drawing.Point(17, 18);
-            this.cbIntensity.Name = "cbIntensity";
-            this.cbIntensity.Size = new System.Drawing.Size(115, 17);
-            this.cbIntensity.TabIndex = 0;
-            this.cbIntensity.Text = "Intensity Histogram";
-            this.cbIntensity.UseVisualStyleBackColor = true;
+            this.groupBox5.Controls.Add(this.cbRelevanceFeedback);
+            this.groupBox5.Location = new System.Drawing.Point(367, 95);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(229, 36);
+            this.groupBox5.TabIndex = 31;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Options";
             // 
-            // cbColorCode
+            // cbRelevanceFeedback
             // 
-            this.cbColorCode.AutoSize = true;
-            this.cbColorCode.Location = new System.Drawing.Point(17, 46);
-            this.cbColorCode.Name = "cbColorCode";
-            this.cbColorCode.Size = new System.Drawing.Size(128, 17);
-            this.cbColorCode.TabIndex = 1;
-            this.cbColorCode.Text = "Color-Code Histogram";
-            this.cbColorCode.UseVisualStyleBackColor = true;
-            // 
-            // cbTextureEnergy
-            // 
-            this.cbTextureEnergy.AutoSize = true;
-            this.cbTextureEnergy.Location = new System.Drawing.Point(17, 74);
-            this.cbTextureEnergy.Name = "cbTextureEnergy";
-            this.cbTextureEnergy.Size = new System.Drawing.Size(98, 17);
-            this.cbTextureEnergy.TabIndex = 2;
-            this.cbTextureEnergy.Text = "Texture Energy";
-            this.cbTextureEnergy.UseVisualStyleBackColor = true;
-            // 
-            // cbTextureEntropy
-            // 
-            this.cbTextureEntropy.AutoSize = true;
-            this.cbTextureEntropy.Location = new System.Drawing.Point(17, 102);
-            this.cbTextureEntropy.Name = "cbTextureEntropy";
-            this.cbTextureEntropy.Size = new System.Drawing.Size(101, 17);
-            this.cbTextureEntropy.TabIndex = 3;
-            this.cbTextureEntropy.Text = "Texture Entropy";
-            this.cbTextureEntropy.UseVisualStyleBackColor = true;
-            // 
-            // cbTextureContrast
-            // 
-            this.cbTextureContrast.AutoSize = true;
-            this.cbTextureContrast.Location = new System.Drawing.Point(17, 130);
-            this.cbTextureContrast.Name = "cbTextureContrast";
-            this.cbTextureContrast.Size = new System.Drawing.Size(104, 17);
-            this.cbTextureContrast.TabIndex = 4;
-            this.cbTextureContrast.Text = "Texture Contrast";
-            this.cbTextureContrast.UseVisualStyleBackColor = true;
+            this.cbRelevanceFeedback.AutoSize = true;
+            this.cbRelevanceFeedback.Location = new System.Drawing.Point(39, 13);
+            this.cbRelevanceFeedback.Name = "cbRelevanceFeedback";
+            this.cbRelevanceFeedback.Size = new System.Drawing.Size(151, 17);
+            this.cbRelevanceFeedback.TabIndex = 0;
+            this.cbRelevanceFeedback.Text = "Use Relevance Feedback";
+            this.cbRelevanceFeedback.UseVisualStyleBackColor = true;
             // 
             // ResultofSearch
             // 
@@ -550,6 +573,7 @@
             this.AutoScroll = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(784, 729);
+            this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnClose);
@@ -592,6 +616,8 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -638,5 +664,7 @@
         private System.Windows.Forms.CheckBox cbTextureEnergy;
         private System.Windows.Forms.CheckBox cbColorCode;
         private System.Windows.Forms.CheckBox cbIntensity;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.CheckBox cbRelevanceFeedback;
     }
 }
