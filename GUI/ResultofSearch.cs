@@ -15,7 +15,7 @@ namespace CBIR
         public const string HISTOGRAM_FILE = "histogram.dat";
         ArrayList list; //list of PictureClass objects
         frmSearch originalForm;
-        int page, totalPages;
+        int page, totalPages, distanceFunc = 1;
         string imageFoldPath;
 
         //form class constructor
@@ -29,7 +29,7 @@ namespace CBIR
 
         //basically a form_load function to initialize the form as it's brought up
         //function to search through database based on the Query Picture sent in
-        public void doSearch(string queryPicture, string folderPath, bool method1){
+        public void doSearch(string queryPicture, string folderPath){
             imageFoldPath = folderPath;
 
             //get color histograms for all the other images in the database and find their distace from the query image
@@ -46,8 +46,7 @@ namespace CBIR
                                                    pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
 
             //set up the check next to the right check box
-            if (method1) { rbIntensity_Click(new object(), new EventArgs()); }
-            else         { rbColor_Click(new object(), new EventArgs()); }
+            btnSearch_Click(new object(), new EventArgs());
         }
 
         //this function is used to display the results of the search to the screen
@@ -74,9 +73,44 @@ namespace CBIR
         }
 
         //reset screen if new search is clicked
-        private void NewSearch_Click(object sender, EventArgs e){
+        private void btnChangeQuery_Click(object sender, EventArgs e){
             originalForm.Show();
             this.Hide();
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            page = 0;
+
+
+
+            //SortedDictionary<PictureClass, double> gallery = new SortedDictionary<PictureClass, double>();
+            //for (int x = 0; x < list.Count; x++)
+            //{
+            //    gallery.Add((PictureClass)list[x], ((PictureClass)list[x]).intensityDist);
+            //}
+            //sortPictures(gallery);
+
+            //pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
+            //displayResults();
+
+           
+            //for (int x = 0; x < list.Count; x++)
+            //{
+            //    gallery.Add((PictureClass)list[x], ((PictureClass)list[x]).colorCodeDist);
+            //}
+        }
+
+        //close the form. i.e. quit the appliation
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        //clear info if application closed
+        private void ResultofSearch_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            originalForm.Close();
         }
 
         //reset window is next button is clicked
@@ -112,41 +146,14 @@ namespace CBIR
             }
         }
 
-        //clear info if application closed
-        private void ResultofSearch_FormClosing(object sender, FormClosingEventArgs e){
-            originalForm.Close();
-        }
-
-        //reset window if method is changed
-        private void rbIntensity_Click(object sender, EventArgs e){
-            rbIntensity.Checked = true;
-            page = 0;
-
-            SortedDictionary<PictureClass,double> gallery = new SortedDictionary<PictureClass,double>();
-            for (int x = 0; x < list.Count; x++){
-                gallery.Add((PictureClass)list[x], ((PictureClass)list[x]).intensityDist);
-            }
-            sortPictures(gallery);
-
-            pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-            displayResults();
-        }
-
-        //reset window if method is changed
-        private void rbColor_Click(object sender, EventArgs e)
+        private void rbManhattan_CheckedChanged(object sender, EventArgs e)
         {
-            rbColor.Checked = true;
-            page = 0;
+            distanceFunc = 1;
+        }
 
-            SortedDictionary<PictureClass, double> gallery = new SortedDictionary<PictureClass, double>();
-            for (int x = 0; x < list.Count; x++)
-            {
-                gallery.Add((PictureClass)list[x], ((PictureClass)list[x]).colorCodeDist);
-            }
-            sortPictures(gallery);
-
-            pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-            displayResults();
+        private void rbEuclidean_CheckedChanged(object sender, EventArgs e)
+        {
+            distanceFunc = 2;
         }
 
         //Pop open a new form with a full size version of the thumbnail that was just clicked
@@ -159,8 +166,8 @@ namespace CBIR
             if (list[gNumber] != null){
                 double dist = 0.0;
                 PictureClass objPicData = (PictureClass)list[gNumber];
-                if (rbIntensity.Checked) { dist = objPicData.intensityDist; }
-                else                     { dist = objPicData.colorCodeDist; }
+                //if (rbIntensity.Checked) { dist = objPicData.intensityDist; }
+                //else                     { dist = objPicData.colorCodeDist; }
 
                 frmDisplayPicture displayForm = new frmDisplayPicture();
                 displayForm.displayPicture(objPicData.path, objPicData.name, dist);
@@ -186,5 +193,6 @@ namespace CBIR
         }
 
         #endregion
+
     }
 }

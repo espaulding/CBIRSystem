@@ -16,7 +16,6 @@ namespace CBIR
 
         private void frmSearch_Load(object sender, EventArgs e)
         {
-            rbIntensity.Checked = true;
         }
 
         private void btnLoadPicture_Click(object sender, EventArgs e)
@@ -47,7 +46,7 @@ namespace CBIR
             btnSearch.Visible = false;
             lblProcess.Visible = true;
             this.Refresh();
-            resultForm.doSearch(qFile, path, rbIntensity.Checked);
+            resultForm.doSearch(qFile, path);
             resultForm.Show();
             this.Hide();
             btnSearch.Visible = true;
