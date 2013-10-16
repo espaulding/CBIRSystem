@@ -14,7 +14,7 @@ namespace CBIR {
         ArrayList list; //list of PictureClass objects
         frmSearch originalForm;
         int page, totalPages, distanceFunc = 1;
-        string imageFoldPath;
+        string imageFoldPath, queryPic;
 
         //form class constructor
         public ResultofSearch(frmSearch form) {
@@ -23,27 +23,41 @@ namespace CBIR {
             InitializeComponent();
         }
 
+        //get or set all of the top radio buttons and check boxes on the form
+        public bool[][] State {
+            get {
+                bool[][] state = new bool[][] { 
+                                  new bool[] { rbManhattan.Checked, rbEuclidean.Checked },
+                                  new bool[] { cbRelevanceFeedback.Checked },
+                                  new bool[] { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked}
+                                 };
+                return state;
+            }
+            set {
+                rbManhattan.Checked         = value[0][0];
+                rbEuclidean.Checked         = value[0][1];
+                cbRelevanceFeedback.Checked = value[1][0];
+                cbIntensity.Checked         = value[2][0];
+                cbColorCode.Checked         = value[2][1];
+                cbTextureEnergy.Checked     = value[2][2];
+                cbTextureEntropy.Checked    = value[2][3];
+                cbTextureContrast.Checked   = value[2][4];
+            }
+        }
+
         #region FormAndControlEvents
 
         //basically a form_load function to initialize the form as it's brought up
         //function to search through database based on the Query Picture sent in
         public void doSearch(string queryPicture, string folderPath) {
             imageFoldPath = folderPath;
-
-            //get color histograms for all the other images in the database and find their distace from the query image
-            list = CBIRfunctions.calculatePictures(folderPath, HISTOGRAM_FILE, queryPicture, distanceFunc);
-
-            //calculate the number of pages needed if we want 20 pictures per page
-            double numberPerPage = (list.Count / (double)IMAGES_PER_PAGE);
-            totalPages = (int)Math.Ceiling(numberPerPage);
-            pageLabel.Text = "Page 1 /Out of " + totalPages;
-            page = 0;
+            queryPic = queryPicture;
 
             //display the query image
             pbQueryPicture.Image = HF.reScaleImage(Bitmap.FromFile(imageFoldPath + "\\" + queryPicture),
                                                    pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
 
-            //set up the check next to the right check box
+            //set do the default search
             btnSearch_Click(new object(), new EventArgs());
         }
 
@@ -61,7 +75,10 @@ namespace CBIR {
                 if ((pic + offSet) < list.Count && File.Exists(((PictureClass)list[pic + offSet]).path)) {
                     //get the image from the file using the file path and create thumbnail of it
                     Bitmap img = (Bitmap)Bitmap.FromFile(((PictureClass)list[pic + offSet]).path);
-                    box.Image = HF.reScaleImage(img, box.Width, box.Height, "noscale");
+                    img = HF.reScaleImage(img, 0, 95, "height");
+                    box.Width = img.Width;
+                    box.Height = img.Height;
+                    box.Image = img;
                 } else {
                     //if we are past the array or image does not exist them set image in picturebox to null and path to null
                     ((PictureClass)list[pic + offSet]).path = null;
@@ -70,42 +87,42 @@ namespace CBIR {
             }
         }
 
-        //reset screen if new search is clicked
-        private void btnChangeQuery_Click(object sender, EventArgs e) {
-            originalForm.Show();
-            this.Hide();
+        private void cbRelevanceFeedback_CheckedChanged(object sender, EventArgs e) {
+            for (int c = 20; c < 40; c++) {
+                ((CheckBox)gbGallery.Controls[c]).Visible = cbRelevanceFeedback.Checked;
+            }
+        }
+
+        private void cbFeature_CheckedChanged(object sender, EventArgs e) {
+            bool selected = false;
+
+            //if any feature is selected allow searches to proceed; otherwise, disable searches
+            foreach (object cb in gbFeatures.Controls) {
+                if (((CheckBox)cb).Checked) {
+                    selected = true;
+                }
+            }
+
+            if (selected) {
+                btnSearch.Enabled = true;
+            } else {
+                btnSearch.Enabled = false;
+            }
         }
 
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
+            bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
+            list = CBIRfunctions.calculatePictures(imageFoldPath, HISTOGRAM_FILE, queryPic, distanceFunc, features);
 
+            //resort the list of images by their distances
+            List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();
+            for (int x = 0; x < list.Count; x++) { list[x] = sorted[x]; }
 
-
-            //SortedDictionary<PictureClass, double> gallery = new SortedDictionary<PictureClass, double>();
-            //for (int x = 0; x < list.Count; x++)
-            //{
-            //    gallery.Add((PictureClass)list[x], ((PictureClass)list[x]).intensityDist);
-            //}
-            //sortPictures(gallery);
-
-            //pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-            //displayResults();
-
-
-            //for (int x = 0; x < list.Count; x++)
-            //{
-            //    gallery.Add((PictureClass)list[x], ((PictureClass)list[x]).colorCodeDist);
-            //}
-        }
-
-        //close the form. i.e. quit the appliation
-        private void btnClose_Click(object sender, EventArgs e) {
-            this.Close();
-        }
-
-        //clear info if application closed
-        private void ResultofSearch_FormClosing(object sender, FormClosingEventArgs e) {
-            originalForm.Close();
+            //calculate the number of pages needed if we want 20 pictures per page
+            totalPages = (int)Math.Ceiling(list.Count / (double)IMAGES_PER_PAGE);
+            pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
+            displayResults();
         }
 
         //reset window is next button is clicked
@@ -150,57 +167,30 @@ namespace CBIR {
             int gNumber = --number + IMAGES_PER_PAGE * page;
 
             if (list[gNumber] != null) {
-                double dist = 0.0;
                 PictureClass objPicData = (PictureClass)list[gNumber];
-                //if (rbIntensity.Checked) { dist = objPicData.intensityDist; }
-                //else                     { dist = objPicData.colorCodeDist; }
-
                 frmDisplayPicture displayForm = new frmDisplayPicture();
-                displayForm.displayPicture(objPicData.path, objPicData.name, dist);
+                displayForm.displayPicture(objPicData.path, objPicData.name, objPicData.distance);
                 displayForm.Show();
             }
         }
 
-        #endregion
+        //close the form. i.e. quit the appliation
+        private void btnClose_Click(object sender, EventArgs e) {
+            this.Close();
+        }
 
-        #region Local_CBIRfunctions
+        //clear info if application closed
+        private void ResultofSearch_FormClosing(object sender, FormClosingEventArgs e) {
+            originalForm.Close();
+        }
 
-        //sort the gallery by whatever list of doubles has been coupled with the pictures
-        //and then update the global main list with pictures in the correct order
-        private void sortPictures(SortedDictionary<PictureClass, double> gallery) {
-            //make an enumerator that follows the order of the distance values
-            IOrderedEnumerable<KeyValuePair<PictureClass, double>> sortedGallery;
-            sortedGallery = gallery.OrderBy(kvp => kvp.Value);
-
-            int counter = 0;
-            foreach (KeyValuePair<PictureClass, double> pic in sortedGallery) {
-                list[counter++] = pic.Key; //use the ordered enumerator to update the global image list
-            }
+        //reset screen if new search is clicked
+        private void btnChangeQuery_Click(object sender, EventArgs e) {
+            originalForm.State = this.State; //hand off the state so the next search result will match this one
+            originalForm.Show();
+            this.Dispose();
         }
 
         #endregion
-
-        private void cbRelevanceFeedback_CheckedChanged(object sender, EventArgs e) {
-            for (int c = 20; c < 40; c++) {
-                ((CheckBox)gbGallery.Controls[c]).Visible = cbRelevanceFeedback.Checked;
-            }
-        }
-
-        private void cbFeature_CheckedChanged(object sender, EventArgs e) {
-            bool selected = false;
-
-            //if any feature is selected allow searches to proceed; otherwise, disable searches
-            foreach (object cb in gbFeatures.Controls) {
-                if (((CheckBox)cb).Checked) {
-                    selected = true;
-                }
-            }
-
-            if (selected) {
-                btnSearch.Enabled = true;
-            } else {
-                btnSearch.Enabled = false;
-            }
-        }
     }
 }

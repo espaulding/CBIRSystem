@@ -96,7 +96,6 @@
             this.Controls.Add(this.pbDisplay);
             this.Name = "frmDisplayPicture";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DisplayPicture";
             this.ResizeEnd += new System.EventHandler(this.frmDisplayPicture_ResizeEnd);
             ((System.ComponentModel.ISupportInitialize)(this.pbDisplay)).EndInit();
             this.ResumeLayout(false);

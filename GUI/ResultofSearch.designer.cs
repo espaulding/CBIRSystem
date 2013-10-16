@@ -151,8 +151,8 @@
             // pictureBox01
             // 
             this.pictureBox01.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox01.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox01.Location = new System.Drawing.Point(16, 25);
+            this.pictureBox01.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox01.Name = "pictureBox01";
             this.pictureBox01.Size = new System.Drawing.Size(137, 100);
             this.pictureBox01.TabIndex = 0;
@@ -162,8 +162,8 @@
             // pictureBox02
             // 
             this.pictureBox02.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox02.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox02.Location = new System.Drawing.Point(164, 25);
+            this.pictureBox02.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox02.Name = "pictureBox02";
             this.pictureBox02.Size = new System.Drawing.Size(137, 100);
             this.pictureBox02.TabIndex = 1;
@@ -173,8 +173,8 @@
             // pictureBox03
             // 
             this.pictureBox03.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox03.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox03.Location = new System.Drawing.Point(312, 25);
+            this.pictureBox03.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox03.Name = "pictureBox03";
             this.pictureBox03.Size = new System.Drawing.Size(137, 100);
             this.pictureBox03.TabIndex = 2;
@@ -184,8 +184,8 @@
             // pictureBox04
             // 
             this.pictureBox04.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox04.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox04.Location = new System.Drawing.Point(460, 25);
+            this.pictureBox04.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox04.Name = "pictureBox04";
             this.pictureBox04.Size = new System.Drawing.Size(137, 100);
             this.pictureBox04.TabIndex = 3;
@@ -195,8 +195,8 @@
             // pictureBox05
             // 
             this.pictureBox05.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox05.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox05.Location = new System.Drawing.Point(608, 25);
+            this.pictureBox05.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox05.Name = "pictureBox05";
             this.pictureBox05.Size = new System.Drawing.Size(138, 100);
             this.pictureBox05.TabIndex = 4;
@@ -206,8 +206,8 @@
             // pictureBox06
             // 
             this.pictureBox06.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox06.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox06.Location = new System.Drawing.Point(16, 156);
+            this.pictureBox06.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox06.Name = "pictureBox06";
             this.pictureBox06.Size = new System.Drawing.Size(137, 100);
             this.pictureBox06.TabIndex = 5;
@@ -217,8 +217,8 @@
             // pictureBox07
             // 
             this.pictureBox07.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox07.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox07.Location = new System.Drawing.Point(164, 156);
+            this.pictureBox07.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox07.Name = "pictureBox07";
             this.pictureBox07.Size = new System.Drawing.Size(137, 100);
             this.pictureBox07.TabIndex = 6;
@@ -228,8 +228,8 @@
             // pictureBox08
             // 
             this.pictureBox08.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox08.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox08.Location = new System.Drawing.Point(312, 156);
+            this.pictureBox08.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox08.Name = "pictureBox08";
             this.pictureBox08.Size = new System.Drawing.Size(137, 100);
             this.pictureBox08.TabIndex = 7;
@@ -239,8 +239,8 @@
             // pictureBox09
             // 
             this.pictureBox09.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox09.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox09.Location = new System.Drawing.Point(460, 156);
+            this.pictureBox09.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox09.Name = "pictureBox09";
             this.pictureBox09.Size = new System.Drawing.Size(137, 100);
             this.pictureBox09.TabIndex = 8;
@@ -250,8 +250,8 @@
             // pictureBox10
             // 
             this.pictureBox10.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox10.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox10.Location = new System.Drawing.Point(608, 156);
+            this.pictureBox10.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox10.Name = "pictureBox10";
             this.pictureBox10.Size = new System.Drawing.Size(138, 100);
             this.pictureBox10.TabIndex = 9;
@@ -261,8 +261,8 @@
             // pictureBox11
             // 
             this.pictureBox11.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox11.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox11.Location = new System.Drawing.Point(16, 287);
+            this.pictureBox11.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox11.Name = "pictureBox11";
             this.pictureBox11.Size = new System.Drawing.Size(137, 100);
             this.pictureBox11.TabIndex = 10;
@@ -272,8 +272,8 @@
             // pictureBox12
             // 
             this.pictureBox12.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox12.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox12.Location = new System.Drawing.Point(164, 287);
+            this.pictureBox12.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox12.Name = "pictureBox12";
             this.pictureBox12.Size = new System.Drawing.Size(137, 100);
             this.pictureBox12.TabIndex = 11;
@@ -283,8 +283,8 @@
             // pictureBox13
             // 
             this.pictureBox13.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox13.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox13.Location = new System.Drawing.Point(312, 287);
+            this.pictureBox13.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox13.Name = "pictureBox13";
             this.pictureBox13.Size = new System.Drawing.Size(137, 100);
             this.pictureBox13.TabIndex = 12;
@@ -294,8 +294,8 @@
             // pictureBox14
             // 
             this.pictureBox14.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox14.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox14.Location = new System.Drawing.Point(460, 287);
+            this.pictureBox14.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox14.Name = "pictureBox14";
             this.pictureBox14.Size = new System.Drawing.Size(137, 100);
             this.pictureBox14.TabIndex = 13;
@@ -305,8 +305,8 @@
             // pictureBox15
             // 
             this.pictureBox15.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox15.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox15.Location = new System.Drawing.Point(608, 287);
+            this.pictureBox15.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox15.Name = "pictureBox15";
             this.pictureBox15.Size = new System.Drawing.Size(138, 100);
             this.pictureBox15.TabIndex = 14;
@@ -316,8 +316,8 @@
             // pictureBox16
             // 
             this.pictureBox16.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox16.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox16.Location = new System.Drawing.Point(16, 418);
+            this.pictureBox16.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox16.Name = "pictureBox16";
             this.pictureBox16.Size = new System.Drawing.Size(137, 100);
             this.pictureBox16.TabIndex = 15;
@@ -327,8 +327,8 @@
             // pictureBox17
             // 
             this.pictureBox17.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox17.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox17.Location = new System.Drawing.Point(164, 418);
+            this.pictureBox17.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox17.Name = "pictureBox17";
             this.pictureBox17.Size = new System.Drawing.Size(137, 100);
             this.pictureBox17.TabIndex = 16;
@@ -338,8 +338,8 @@
             // pictureBox18
             // 
             this.pictureBox18.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox18.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox18.Location = new System.Drawing.Point(312, 418);
+            this.pictureBox18.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox18.Name = "pictureBox18";
             this.pictureBox18.Size = new System.Drawing.Size(137, 100);
             this.pictureBox18.TabIndex = 17;
@@ -349,8 +349,8 @@
             // pictureBox19
             // 
             this.pictureBox19.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox19.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox19.Location = new System.Drawing.Point(460, 418);
+            this.pictureBox19.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox19.Name = "pictureBox19";
             this.pictureBox19.Size = new System.Drawing.Size(137, 100);
             this.pictureBox19.TabIndex = 18;
@@ -360,8 +360,8 @@
             // pictureBox20
             // 
             this.pictureBox20.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox20.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox20.Location = new System.Drawing.Point(608, 418);
+            this.pictureBox20.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox20.Name = "pictureBox20";
             this.pictureBox20.Size = new System.Drawing.Size(138, 100);
             this.pictureBox20.TabIndex = 19;
@@ -391,6 +391,7 @@
             this.cbTextureContrast.TabIndex = 4;
             this.cbTextureContrast.Text = "Texture Contrast";
             this.cbTextureContrast.UseVisualStyleBackColor = true;
+            this.cbTextureContrast.CheckedChanged += new System.EventHandler(this.cbFeature_CheckedChanged);
             // 
             // cbTextureEntropy
             // 
@@ -401,6 +402,7 @@
             this.cbTextureEntropy.TabIndex = 3;
             this.cbTextureEntropy.Text = "Texture Entropy";
             this.cbTextureEntropy.UseVisualStyleBackColor = true;
+            this.cbTextureEntropy.CheckedChanged += new System.EventHandler(this.cbFeature_CheckedChanged);
             // 
             // cbTextureEnergy
             // 
@@ -411,6 +413,7 @@
             this.cbTextureEnergy.TabIndex = 2;
             this.cbTextureEnergy.Text = "Texture Energy";
             this.cbTextureEnergy.UseVisualStyleBackColor = true;
+            this.cbTextureEnergy.CheckedChanged += new System.EventHandler(this.cbFeature_CheckedChanged);
             // 
             // cbColorCode
             // 
@@ -421,6 +424,7 @@
             this.cbColorCode.TabIndex = 1;
             this.cbColorCode.Text = "Color-Code Histogram";
             this.cbColorCode.UseVisualStyleBackColor = true;
+            this.cbColorCode.CheckedChanged += new System.EventHandler(this.cbFeature_CheckedChanged);
             // 
             // cbIntensity
             // 
@@ -433,6 +437,7 @@
             this.cbIntensity.TabIndex = 0;
             this.cbIntensity.Text = "Intensity Histogram";
             this.cbIntensity.UseVisualStyleBackColor = true;
+            this.cbIntensity.CheckedChanged += new System.EventHandler(this.cbFeature_CheckedChanged);
             // 
             // btnChangeQuery
             // 
@@ -826,7 +831,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(1327, 729);
+            this.ClientSize = new System.Drawing.Size(784, 729);
             this.Controls.Add(this.gbOptions);
             this.Controls.Add(this.gbGallery);
             this.Controls.Add(this.gbDistance);
@@ -840,7 +845,7 @@
             this.Controls.Add(this.pageLabel);
             this.Name = "ResultofSearch";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "ResultofSearch";
+            this.Text = "CBIR System";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ResultofSearch_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox01)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox02)).EndInit();

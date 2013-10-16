@@ -93,16 +93,19 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(294, 342);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.lblProcess);
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.btnLoadPicture);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(304, 375);
+            this.MinimumSize = new System.Drawing.Size(304, 375);
             this.Name = "frmSearch";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Search";
+            this.Text = "CBIR System";
             this.Load += new System.EventHandler(this.frmSearch_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pbQueryPicture)).EndInit();
             this.groupBox2.ResumeLayout(false);
