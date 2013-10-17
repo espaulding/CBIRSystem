@@ -157,7 +157,7 @@
             this.pictureBox01.Size = new System.Drawing.Size(137, 100);
             this.pictureBox01.TabIndex = 0;
             this.pictureBox01.TabStop = false;
-            this.pictureBox01.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox01.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox02
             // 
@@ -168,7 +168,7 @@
             this.pictureBox02.Size = new System.Drawing.Size(137, 100);
             this.pictureBox02.TabIndex = 1;
             this.pictureBox02.TabStop = false;
-            this.pictureBox02.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox02.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox03
             // 
@@ -179,7 +179,7 @@
             this.pictureBox03.Size = new System.Drawing.Size(137, 100);
             this.pictureBox03.TabIndex = 2;
             this.pictureBox03.TabStop = false;
-            this.pictureBox03.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox03.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox04
             // 
@@ -190,7 +190,7 @@
             this.pictureBox04.Size = new System.Drawing.Size(137, 100);
             this.pictureBox04.TabIndex = 3;
             this.pictureBox04.TabStop = false;
-            this.pictureBox04.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox04.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox05
             // 
@@ -201,7 +201,7 @@
             this.pictureBox05.Size = new System.Drawing.Size(138, 100);
             this.pictureBox05.TabIndex = 4;
             this.pictureBox05.TabStop = false;
-            this.pictureBox05.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox05.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox06
             // 
@@ -212,7 +212,7 @@
             this.pictureBox06.Size = new System.Drawing.Size(137, 100);
             this.pictureBox06.TabIndex = 5;
             this.pictureBox06.TabStop = false;
-            this.pictureBox06.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox06.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox07
             // 
@@ -223,7 +223,7 @@
             this.pictureBox07.Size = new System.Drawing.Size(137, 100);
             this.pictureBox07.TabIndex = 6;
             this.pictureBox07.TabStop = false;
-            this.pictureBox07.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox07.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox08
             // 
@@ -234,7 +234,7 @@
             this.pictureBox08.Size = new System.Drawing.Size(137, 100);
             this.pictureBox08.TabIndex = 7;
             this.pictureBox08.TabStop = false;
-            this.pictureBox08.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox08.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox09
             // 
@@ -245,7 +245,7 @@
             this.pictureBox09.Size = new System.Drawing.Size(137, 100);
             this.pictureBox09.TabIndex = 8;
             this.pictureBox09.TabStop = false;
-            this.pictureBox09.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox09.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox10
             // 
@@ -256,7 +256,7 @@
             this.pictureBox10.Size = new System.Drawing.Size(138, 100);
             this.pictureBox10.TabIndex = 9;
             this.pictureBox10.TabStop = false;
-            this.pictureBox10.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox10.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox11
             // 
@@ -267,7 +267,7 @@
             this.pictureBox11.Size = new System.Drawing.Size(137, 100);
             this.pictureBox11.TabIndex = 10;
             this.pictureBox11.TabStop = false;
-            this.pictureBox11.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox11.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox12
             // 
@@ -278,7 +278,7 @@
             this.pictureBox12.Size = new System.Drawing.Size(137, 100);
             this.pictureBox12.TabIndex = 11;
             this.pictureBox12.TabStop = false;
-            this.pictureBox12.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox12.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox13
             // 
@@ -289,7 +289,7 @@
             this.pictureBox13.Size = new System.Drawing.Size(137, 100);
             this.pictureBox13.TabIndex = 12;
             this.pictureBox13.TabStop = false;
-            this.pictureBox13.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox13.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox14
             // 
@@ -300,7 +300,7 @@
             this.pictureBox14.Size = new System.Drawing.Size(137, 100);
             this.pictureBox14.TabIndex = 13;
             this.pictureBox14.TabStop = false;
-            this.pictureBox14.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox14.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox15
             // 
@@ -311,7 +311,7 @@
             this.pictureBox15.Size = new System.Drawing.Size(138, 100);
             this.pictureBox15.TabIndex = 14;
             this.pictureBox15.TabStop = false;
-            this.pictureBox15.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox15.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox16
             // 
@@ -322,7 +322,7 @@
             this.pictureBox16.Size = new System.Drawing.Size(137, 100);
             this.pictureBox16.TabIndex = 15;
             this.pictureBox16.TabStop = false;
-            this.pictureBox16.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox16.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox17
             // 
@@ -333,7 +333,7 @@
             this.pictureBox17.Size = new System.Drawing.Size(137, 100);
             this.pictureBox17.TabIndex = 16;
             this.pictureBox17.TabStop = false;
-            this.pictureBox17.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox17.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox18
             // 
@@ -344,7 +344,7 @@
             this.pictureBox18.Size = new System.Drawing.Size(137, 100);
             this.pictureBox18.TabIndex = 17;
             this.pictureBox18.TabStop = false;
-            this.pictureBox18.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox18.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox19
             // 
@@ -355,7 +355,7 @@
             this.pictureBox19.Size = new System.Drawing.Size(137, 100);
             this.pictureBox19.TabIndex = 18;
             this.pictureBox19.TabStop = false;
-            this.pictureBox19.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox19.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // pictureBox20
             // 
@@ -366,7 +366,7 @@
             this.pictureBox20.Size = new System.Drawing.Size(138, 100);
             this.pictureBox20.TabIndex = 19;
             this.pictureBox20.TabStop = false;
-            this.pictureBox20.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox20.Click += new System.EventHandler(this.PictureBox_Click);
             // 
             // gbFeatures
             // 
@@ -584,6 +584,7 @@
             this.cbRelevant01.TabIndex = 32;
             this.cbRelevant01.Text = "Relevant Image";
             this.cbRelevant01.UseVisualStyleBackColor = true;
+            this.cbRelevant01.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant02
             // 
@@ -594,6 +595,7 @@
             this.cbRelevant02.TabIndex = 38;
             this.cbRelevant02.Text = "Relevant Image";
             this.cbRelevant02.UseVisualStyleBackColor = true;
+            this.cbRelevant02.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant03
             // 
@@ -604,6 +606,7 @@
             this.cbRelevant03.TabIndex = 39;
             this.cbRelevant03.Text = "Relevant Image";
             this.cbRelevant03.UseVisualStyleBackColor = true;
+            this.cbRelevant03.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant04
             // 
@@ -614,6 +617,7 @@
             this.cbRelevant04.TabIndex = 40;
             this.cbRelevant04.Text = "Relevant Image";
             this.cbRelevant04.UseVisualStyleBackColor = true;
+            this.cbRelevant04.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant05
             // 
@@ -624,6 +628,7 @@
             this.cbRelevant05.TabIndex = 41;
             this.cbRelevant05.Text = "Relevant Image";
             this.cbRelevant05.UseVisualStyleBackColor = true;
+            this.cbRelevant05.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant06
             // 
@@ -634,6 +639,7 @@
             this.cbRelevant06.TabIndex = 33;
             this.cbRelevant06.Text = "Relevant Image";
             this.cbRelevant06.UseVisualStyleBackColor = true;
+            this.cbRelevant06.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant07
             // 
@@ -644,6 +650,7 @@
             this.cbRelevant07.TabIndex = 42;
             this.cbRelevant07.Text = "Relevant Image";
             this.cbRelevant07.UseVisualStyleBackColor = true;
+            this.cbRelevant07.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant08
             // 
@@ -654,6 +661,7 @@
             this.cbRelevant08.TabIndex = 53;
             this.cbRelevant08.Text = "Relevant Image";
             this.cbRelevant08.UseVisualStyleBackColor = true;
+            this.cbRelevant08.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant09
             // 
@@ -664,6 +672,7 @@
             this.cbRelevant09.TabIndex = 45;
             this.cbRelevant09.Text = "Relevant Image";
             this.cbRelevant09.UseVisualStyleBackColor = true;
+            this.cbRelevant09.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant10
             // 
@@ -674,6 +683,7 @@
             this.cbRelevant10.TabIndex = 46;
             this.cbRelevant10.Text = "Relevant Image";
             this.cbRelevant10.UseVisualStyleBackColor = true;
+            this.cbRelevant10.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant11
             // 
@@ -684,6 +694,7 @@
             this.cbRelevant11.TabIndex = 36;
             this.cbRelevant11.Text = "Relevant Image";
             this.cbRelevant11.UseVisualStyleBackColor = true;
+            this.cbRelevant11.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant12
             // 
@@ -694,6 +705,7 @@
             this.cbRelevant12.TabIndex = 43;
             this.cbRelevant12.Text = "Relevant Image";
             this.cbRelevant12.UseVisualStyleBackColor = true;
+            this.cbRelevant12.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant13
             // 
@@ -704,6 +716,7 @@
             this.cbRelevant13.TabIndex = 49;
             this.cbRelevant13.Text = "Relevant Image";
             this.cbRelevant13.UseVisualStyleBackColor = true;
+            this.cbRelevant13.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant14
             // 
@@ -714,6 +727,7 @@
             this.cbRelevant14.TabIndex = 47;
             this.cbRelevant14.Text = "Relevant Image";
             this.cbRelevant14.UseVisualStyleBackColor = true;
+            this.cbRelevant14.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant15
             // 
@@ -724,6 +738,7 @@
             this.cbRelevant15.TabIndex = 48;
             this.cbRelevant15.Text = "Relevant Image";
             this.cbRelevant15.UseVisualStyleBackColor = true;
+            this.cbRelevant15.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant16
             // 
@@ -734,6 +749,7 @@
             this.cbRelevant16.TabIndex = 37;
             this.cbRelevant16.Text = "Relevant Image";
             this.cbRelevant16.UseVisualStyleBackColor = true;
+            this.cbRelevant16.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant17
             // 
@@ -744,6 +760,7 @@
             this.cbRelevant17.TabIndex = 44;
             this.cbRelevant17.Text = "Relevant Image";
             this.cbRelevant17.UseVisualStyleBackColor = true;
+            this.cbRelevant17.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant18
             // 
@@ -754,6 +771,7 @@
             this.cbRelevant18.TabIndex = 50;
             this.cbRelevant18.Text = "Relevant Image";
             this.cbRelevant18.UseVisualStyleBackColor = true;
+            this.cbRelevant18.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant19
             // 
@@ -764,6 +782,7 @@
             this.cbRelevant19.TabIndex = 51;
             this.cbRelevant19.Text = "Relevant Image";
             this.cbRelevant19.UseVisualStyleBackColor = true;
+            this.cbRelevant19.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // cbRelevant20
             // 
@@ -774,6 +793,7 @@
             this.cbRelevant20.TabIndex = 52;
             this.cbRelevant20.Text = "Relevant Image";
             this.cbRelevant20.UseVisualStyleBackColor = true;
+            this.cbRelevant20.CheckedChanged += new System.EventHandler(this.cbRelevant_CheckedChanged);
             // 
             // line1
             // 

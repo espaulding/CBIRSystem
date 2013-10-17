@@ -6,78 +6,91 @@ using System.Drawing;
 
 namespace CBIR.UnitTests {
     static class CBIRTests {
+        private static string NL = System.Environment.NewLine;
+
         public static void DoTests() {
-            if (IntensityTest()) {
-                Console.WriteLine("passed: intensity function working");
-            } else {
-                Console.WriteLine("failed: intensity function is broken");
-            }
-
-            if (CoOccurrenceTest()) {
-                Console.WriteLine("passed: co-occurrence function working");
-            } else {
-                Console.WriteLine("failed: co-occurrence function is broken");
-            }
-
-            if (EnergyTest()) {
-                Console.WriteLine("passed: energy function working");
-            } else {
-                Console.WriteLine("failed: energy function is broken");
-            }
-
-            if (EntropyTest()) {
-                Console.WriteLine("passed: entropy function working");
-            } else {
-                Console.WriteLine("failed: entropy function is broken");
-            }
-
-            if (ContrastTest()) {
-                Console.WriteLine("passed: contrast function working");
-            } else {
-                Console.WriteLine("failed: contrast function is broken");
-            }
+            Console.WriteLine(IntensityTest());
+            Console.WriteLine(CoOccurrenceTest());
+            Console.WriteLine(TextureTest());
 
             Console.ReadLine();
         }
 
-        public static bool IntensityTest() {
-            int I = (int)CBIRfunctions.CalcIntensity(Color.White);
-            if (I == 255) { return true; }
-            return false;
+        public static string IntensityTest() {
+            string testresult = "Intensity Function Test" + NL;
+            bool checks = true;
+
+            try {
+                //test the color white
+                int I = (int)CBIRfunctions.CalcIntensity(Color.White);
+                if (I != 255) { testresult += "Failed: for White expected 255 but got " + I + NL; checks = false; }
+
+                //test the color black
+                I = (int)CBIRfunctions.CalcIntensity(Color.Black);
+                if (I != 0) { testresult += "Failed: for Black expected 0 but got " + I + NL; checks = false; }
+            } catch(Exception ex) {
+                testresult += "Failed: with Exception " + ex.Message + NL;
+            }
+
+            if (checks) { testresult += "Passed" + NL; }
+            return testresult + NL;
         }
 
-        public static bool CoOccurrenceTest() {
-            Bitmap i = Properties.Resources.testImage;
-            Dictionary<int, Dictionary<int, double>> cooccur = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
-            if (cooccur[25][234] == 1) { return true; }
-            return false;
+        public static string CoOccurrenceTest() {
+            string testresult = "Co-Occurrence matrix Function Test" + NL;
+            bool checks = true;
+
+            try {
+                Bitmap i = Properties.Resources.testImage;
+                Dictionary<int, Dictionary<int, double>> com = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
+                if (com[25][234] != 1) { testresult += "Failed: expected cell (25,234) to be 1  but got " + com[25][234] + NL; checks = false; }
+            } catch (Exception ex) {
+                testresult += "Failed: with Exception " + ex.Message + NL;
+            }
+
+            if (checks) { testresult += "Passed" + NL; }
+            return testresult + NL;
         }
 
-        public static bool EnergyTest() {
-            Bitmap i = Properties.Resources.testImage;
-            Dictionary<int, Dictionary<int, double>> cooccur = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
-            Dictionary<int, Dictionary<int, double>> grayTone = CBIRfunctions.CalcGrayTone(cooccur);
-            double energy = CBIRfunctions.CalcEnergy(grayTone);
-            if (energy == 0.11111111111111109) { return true; }
-            return false;
-        }
+        public static string TextureTest() {
+            string testresult = "Energy Function Test" + NL;
+            bool checks = true;
 
-        public static bool EntropyTest() {
-            Bitmap i = Properties.Resources.testImage;
-            Dictionary<int, Dictionary<int, double>> cooccur = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
-            Dictionary<int, Dictionary<int, double>> grayTone = CBIRfunctions.CalcGrayTone(cooccur);
-            double entropy = CBIRfunctions.CalcEntropy(grayTone);
-            if (entropy == -3.1699250014423122) { return true; }
-            return false;
-        }
+            try {
+                Bitmap i = Properties.Resources._1;
+                Dictionary<int, Dictionary<int, double>> com = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
+                Dictionary<int, Dictionary<int, double>> ngtcom = CBIRfunctions.CalcGrayTone(com);
 
-        public static bool ContrastTest() {
-            Bitmap i = Properties.Resources.testImage;
-            Dictionary<int, Dictionary<int, double>> cooccur = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
-            Dictionary<int, Dictionary<int, double>> grayTone = CBIRfunctions.CalcGrayTone(cooccur);
-            double contrast = CBIRfunctions.CalcContrast(grayTone);
-            if (contrast == 12581.666666666668) { return true; }
-            return false;
+                //check the energy of the gray tone matrix
+                double energy = CBIRfunctions.CalcEnergy(ngtcom);
+                if (energy != 0.0013484656311732802) { //value for _1
+                    //from Min0.0014
+                    testresult += "Failed: expected energy 0.0014 but got " + energy + NL;
+                    checks = false;
+                }
+
+                //check the entropy of the gray tone matrix
+                double entropy = CBIRfunctions.CalcEntropy(ngtcom);
+                if (entropy != -11.386328337500963) { //value for _1
+                    //from Min -11.3853  maybe she typoed the 6 into a 5
+                    testresult += "Failed: expected entropy -11.3853 but got " + entropy + NL;
+                    checks = false;
+                }
+
+                //check the contrast of the gray tone matrix
+                double contrast = CBIRfunctions.CalcContrast(ngtcom);
+                if (contrast != 159.03649209031443) { //value for _1
+                    //from Min  159.0272  slight difference here too
+                    testresult += "Failed: expected contrast 159.0272 but got " + contrast + NL;
+                    checks = false;
+                }
+                
+            } catch (Exception ex) {
+                testresult += "Failed: with Exception " + ex.Message + NL;
+            }
+
+            if (checks) { testresult += "Passed" + NL; }
+            return testresult + NL;
         }
     }
 }

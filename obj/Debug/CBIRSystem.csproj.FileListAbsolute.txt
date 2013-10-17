@@ -17,3 +17,13 @@ C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.Properties.Resources.
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.ResultofSearch.resources
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIRSystem.csproj.GenerateResource.Cache
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIRSystem.csprojResolveAssemblyReference.cache
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.exe
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.pdb
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\bin\Debug\CBIR.exe
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\bin\Debug\CBIR.pdb
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIRSystem.csprojResolveAssemblyReference.cache
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.frmDisplayPicture.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.frmSearch.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.Properties.Resources.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIR.ResultofSearch.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Debug\CBIRSystem.csproj.GenerateResource.Cache
