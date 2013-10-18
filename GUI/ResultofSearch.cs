@@ -57,7 +57,6 @@ namespace CBIR {
             pbQueryPicture.Image = HF.reScaleImage(Bitmap.FromFile(imageFoldPath + "\\" + queryPicture),
                                                    pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
 
-            //set do the default search
             InitNewSearch();
             btnSearch_Click(new object(), new EventArgs());
         }
@@ -79,7 +78,12 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            list = CBIRfunctions.calculatePictures(imageFoldPath, queryPic, distanceFunc, features, weight, list);
+
+            //update the weights for the next search
+            if (cbRelevanceFeedback.Checked) { CBIRfunctions.AdjustWeights(weight, features, list, imageFoldPath); }
+
+            //do the search
+            CBIRfunctions.calculatePictures(imageFoldPath, queryPic, distanceFunc, features, weight, ref list);
 
             //re-sort the list of images by their distances
             List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();
@@ -88,7 +92,7 @@ namespace CBIR {
             //calculate the number of pages needed if we want 20 pictures per page
             totalPages = (int)Math.Ceiling(list.Count / (double)IMAGES_PER_PAGE);
             pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-            DisplayResults();
+            DisplayImageResults();
         }
 
         //close the form. i.e. quit the appliation
@@ -101,11 +105,11 @@ namespace CBIR {
             if (page < (totalPages - 1)) {
                 page += 1;
                 pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-                DisplayResults();
+                DisplayImageResults();
             } else {
                 page = 0;
                 pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-                DisplayResults();
+                DisplayImageResults();
             }
         }
 
@@ -114,11 +118,11 @@ namespace CBIR {
             if (page > 0) {
                 page -= 1;
                 pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-                DisplayResults();
+                DisplayImageResults();
             } else {
                 page = (totalPages - 1);
                 pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
-                DisplayResults();
+                DisplayImageResults();
             }
         }
 
@@ -176,7 +180,7 @@ namespace CBIR {
         //this function is used to display the results of the search to the screen
         //TODO: fix so that the last page doesn't have errors when the total number
         //      of images is not divisable by 20
-        public void DisplayResults() {
+        public void DisplayImageResults() {
             //offset used to scan through the list and get the right pictures based on the current page we are on 
             int offSet = page * IMAGES_PER_PAGE;
 
@@ -191,14 +195,26 @@ namespace CBIR {
                     box.Width = img.Width;
                     box.Height = img.Height;
                     box.Image = img;
-
-                    //set the relevant checkbox for this image... checkboxs are in the gallery.Controls [20,39]
-                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = ((PictureClass)list[pic + offSet]).relevant;
                 } else {
                     //if we are past the array or image does not exist them set image in picturebox to null and path to null
                     ((PictureClass)list[pic + offSet]).path = null;
-                    ((PictureClass)list[pic + offSet]).relevant = false;
                     box.Image = null;
+                }
+            }
+            DisplayRelevantImages();
+        }
+
+        public void DisplayRelevantImages() {
+            //offset used to scan through the list and get the right pictures based on the current page we are on 
+            int offSet = page * IMAGES_PER_PAGE;
+
+            for (int pic = 0; pic < IMAGES_PER_PAGE; pic++) {
+                //check to make sure we are still with in the array and picture exists
+                if ((pic + offSet) < list.Count && File.Exists(((PictureClass)list[pic + offSet]).path)) {
+                    //set the relevant checkbox for this image... checkboxs are in the gallery.Controls [20,39]
+                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = ((PictureClass)list[pic + offSet]).relevant;
+                } else {
+                    ((PictureClass)list[pic + offSet]).relevant = false; //TODO: hmm does this really make sense?
                 }
             }
         }
@@ -237,12 +253,11 @@ namespace CBIR {
             }
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
             weight = CBIRfunctions.GetInitialWeights(features);
+            if (list != null) { DisplayRelevantImages(); }
         }
 
         #endregion //Gallery
 
-        #endregion //FormAndControlEvents
-
-        
+        #endregion //FormAndControlEvents 
     }
 }

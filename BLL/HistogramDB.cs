@@ -45,7 +45,7 @@ namespace CBIR {
 
         //use gaussian normalization
         public void NormalizeFeatures() {
-            ComputeStdDev();
+            ComputeStdDevByFeature();
             List<string> record = intensityDB.Keys.ToList<string>();
             for (int c = 0; c < record.Count; c++) {
                 int intensity = intensityDB[record[c]].Count;
@@ -81,7 +81,7 @@ namespace CBIR {
             }
         }
 
-        public void ComputeStdDev() {
+        public void ComputeStdDevByFeature() {
             //there are 25 intensity features, 64 color-code features, and 3 texture features
             ArrayList[] feature = new ArrayList[25 + 64 + 3];
             foreach (KeyValuePair<string, ArrayList> record in intensityDB) {
@@ -112,9 +112,9 @@ namespace CBIR {
             for (int c = 0; c < feature.Length; c++) {
                 double avg = ((ArrayList)feature[c]).OfType<double>().Average(); //find the mean
                 double sum = ((ArrayList)feature[c]).OfType<double>().Sum(f => (f - avg) * (f - avg)); //get the numerator for std dev
-                double stddev = Math.Sqrt(sum / (((ArrayList)feature[c]).Count - 1));
+                double sigma = Math.Sqrt(sum / (((ArrayList)feature[c]).Count - 1));
                 this.mean.Add(avg);
-                this.stddev.Add(stddev);
+                this.stddev.Add(sigma);
             }
         }
 

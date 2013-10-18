@@ -11,17 +11,17 @@ namespace CBIR {
         private const int INTENSITY_BIN_COUNT = 25;
         public const string HISTOGRAM_FILE = "imageFeatures.dat";
 
-        #region preprocessdata
+        #region processdata
 
         //This function finds the feature vectors for each picture as necessary
         //and then calculats the distance that each picture is from the query image
-        public static ArrayList calculatePictures(string imageFoldPath, string qFilename, int distanceFunc,
-                                                  bool[] features, ArrayList weight, ArrayList oldlist) {
+        public static void calculatePictures(string imageFoldPath, string qFilename, int distanceFunc,
+                                             bool[] features, ArrayList weight, ref ArrayList oldlist) {
             //displacement by rows, columns used by texture features
             int dr = 1, dc = 1; //hardcoded for now but maybe a parameter later
             ArrayList list;
             //if there is no oldlist start making a new one, but otherwise alias the old list as the new one
-            if (oldlist == null) { list = new ArrayList(); } else { list = oldlist; }
+            if (oldlist == null) { list = new ArrayList(); oldlist = list; } else { list = oldlist; }
 
             DirectoryInfo dir = new DirectoryInfo(imageFoldPath);
             string dbFile = imageFoldPath + "\\" + HISTOGRAM_FILE;
@@ -29,9 +29,10 @@ namespace CBIR {
             HistogramDB db = null;
 
             //read the existing histogram file if there is one
-            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); } else {  db = new HistogramDB(); }
+            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); } else { db = new HistogramDB(); }
 
-            //if we found a new picture in the folder rebuild the database so that every picture is normalized correctly
+            //if we found a new picture in the folder rebuild the database so that 
+            //gaussian normalization can be reapplied over all the features
             if (UpdateDB(db, dir, list)) {
                 RebuildDB(ref db, dir, dr, dc);
                 if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
@@ -42,15 +43,13 @@ namespace CBIR {
 
             //update picture distances
             ArrayList qFeatures = SelectFeatures(db, qFilename, features);
-            foreach (var file in dir.GetFiles("*.jpg")) {            
+            foreach (var file in dir.GetFiles("*.jpg")) {
                 ArrayList picFeatures = SelectFeatures(db, file.Name, features);
 
                 //find the picture object in the old list that matches the current file being processed
                 PictureClass pic = list.OfType<PictureClass>().Single(p => p.name == file.Name);
                 pic.distance = CalculateDist(qFeatures, picFeatures, weight, distanceFunc);
             }
-
-            return list;
         }
 
         //re-aquire raw histograms for every image in the directory
@@ -70,7 +69,7 @@ namespace CBIR {
         //  absent item removed from list, can probably just keep the db as is
         //-a file was added to the folder
         //  new file gets added to list, db gets fully rebuilt and saved over
-        static public bool UpdateDB(HistogramDB db, DirectoryInfo dir, ArrayList list){
+        static public bool UpdateDB(HistogramDB db, DirectoryInfo dir, ArrayList list) {
             bool updated = false;
             List<PictureClass> removed = new List<PictureClass>();
 
@@ -132,6 +131,57 @@ namespace CBIR {
             if (features[4]) { combined.Add(db.textureDB[filename][2]); } //contrast
             //NormalizeGaussian(combined);
             return combined;
+        }
+
+        //generate a matrix with rows as selected features, and columns being images marked as relevant
+        //if this matrix has less than 2 columns leave the weights are they are
+        //otherwise find the standard deviation of each row (features) and adjust the weights
+        //CRITICAL this function assumes that the database file exists and that it is in SYNC with the list of PictureClass objects
+        static public void AdjustWeights(ArrayList weight, bool[] features, ArrayList list, string imageFoldPath) {
+            if (list == null) { return; }
+
+            //read the existing histogram file if there is one
+            string dbFile = imageFoldPath + "\\" + HISTOGRAM_FILE;
+            HistogramDB db = null;
+            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); } else { throw new Exception("Image meta-data database not found."); }
+
+            //initialize the matrix: rows (features), columns (relevant images)
+            List<double>[] matrix = new List<double>[weight.Count]; //rows are [], columns are List<double>
+            for (int i = 0; i < weight.Count; i++) { matrix[i] = new List<double>(); } //init the columns
+
+            //build the matrix
+            foreach (string pic in db.sizeDB.Keys) {
+                bool relevant = list.OfType<PictureClass>().Single(p => p.name == pic).relevant;
+                if (relevant) {
+                    ArrayList selected = SelectFeatures(db, pic, features);
+                    for (int i = 0; i < selected.Count; i++) {
+                        matrix[i].Add((double)weight[i] * (double)selected[i]);
+                    }
+                }
+            }
+
+            //if we have at least 2 relevant pictures go ahead and adjust the weights; otherwise, don't do anything just leave the weights as they are
+            if (matrix[0].Count > 1) {
+                double mean = 0;  //mean == average value, mean != median
+                double sigma = 0; //sigma == standard deviation, sigma^2 == variance
+                int S = matrix.Length; //there are S selected features
+                int N = matrix[0].Count; //there are N relevant images
+
+                //find the means and sigmas, one for each feature (row)
+                for (int i = 0; i < S; i++) {
+                    mean = matrix[i].Sum() / N;
+                    sigma = Math.Sqrt( matrix[i].Sum(fi => (fi - mean) * (fi - mean)) / (N - 1) );
+
+                    if (mean != 0 && sigma == 0) {
+                        weight[i] = 0.5 * matrix[i].Where(fi => fi != 0).Min();
+                    } else if (mean == 0) {
+                        weight[i] = 0.0d;
+                    } else {
+                        weight[i] = 1.0d / sigma;
+                    }
+                }
+                NoramlizeWeights(weight);
+            }
         }
 
         #endregion
@@ -299,7 +349,7 @@ namespace CBIR {
 
         //will normalize so that each feature in the list is a percent between [0,1)
         //the entire vector will sum to 1 afterwards
-        static public void NormalizeBySize(ArrayList features, int N) {
+        static private void NormalizeBySize(ArrayList features, int N) {
             //normalize bins by divding by the number of pixels
             //to account for images of different sizes
             for (int f = 0; f < features.Count; f++) {
@@ -308,7 +358,7 @@ namespace CBIR {
         }
 
         //normlize the vector so that each feature is between [0,1]
-        static public void NormalizeUniform(ArrayList features) {
+        static private void NormalizeUniform(ArrayList features) {
             double min = features.OfType<double>().Min();
             double max = features.OfType<double>().Max();
 
@@ -319,25 +369,24 @@ namespace CBIR {
 
         //Intra-Normalization step and Inter-Normalization step combined not really following the article on this part
         //normlize the vector so that each feature is between [-3,3]
-        static public void NormalizeGaussian(ArrayList features) {
+        static private void NormalizeGaussian(ArrayList features) {
             // standard deviation is sqrt(sum((value - mean)^2) / (N-1)) where N is number of items in the vector
             // see http://en.wikipedia.org/wiki/Standard_deviation#Discrete_random_variable for any questions
 
             if (features.Count > 1) {
-                double avg = features.OfType<double>().Average(); //find the mean
-                double sum = features.OfType<double>().Sum(f => (f - avg) * (f - avg)); //get the numerator for std dev
-                double stddev = Math.Sqrt(sum / (features.Count - 1));
+                double mean = features.OfType<double>().Average(); //find the mean
+                double sigma = Math.Sqrt(features.OfType<double>().Sum(f => (f - mean) * (f - mean)) / (features.Count - 1));
 
-                if (stddev != 0) { //apply normalization       
+                if (sigma != 0) { //apply normalization       
                     for (int f = 0; f < features.Count; f++) {
-                        features[f] = ((double)features[f] - avg) / (stddev);
+                        features[f] = ((double)features[f] - mean) / (sigma);
                     }
                 }
             }
         }
 
         //normalize the adjusted weights so that all weights sum to 1
-        static public void NoramlizeWeights(ArrayList weight) {
+        static private void NoramlizeWeights(ArrayList weight) {
             double sum = weight.OfType<double>().Sum();
             for (int i = 0; i < weight.Count; i++) {
                 weight[i] = (double)weight[i] / sum;
