@@ -162,22 +162,26 @@ namespace CBIR {
 
             //if we have at least 2 relevant pictures go ahead and adjust the weights; otherwise, don't do anything just leave the weights as they are
             if (matrix[0].Count > 1) {
-                double mean = 0;  //mean == average value, mean != median
-                double sigma = 0; //sigma == standard deviation, sigma^2 == variance
+                List<double> mean = new List<double>();  //mean == average value, mean != median
+                List<double> sigma = new List<double>(); //sigma == standard deviation, sigma^2 == variance
                 int S = matrix.Length; //there are S selected features
                 int N = matrix[0].Count; //there are N relevant images
 
                 //find the means and sigmas, one for each feature (row)
                 for (int i = 0; i < S; i++) {
-                    mean = matrix[i].Sum() / N;
-                    sigma = Math.Sqrt( matrix[i].Sum(fi => (fi - mean) * (fi - mean)) / (N - 1) );
+                    mean.Add(matrix[i].Sum() / N);
+                    sigma.Add(Math.Sqrt(matrix[i].Sum(fi => (fi - mean[i]) * (fi - mean[i])) / (N - 1)));
+                }
 
-                    if (mean != 0 && sigma == 0) {
-                        weight[i] = 0.5 * matrix[i].Where(fi => fi != 0).Min();
-                    } else if (mean == 0) {
+                //update the weights
+                for (int i = 0; i < S; i++) {
+                    if (mean[i] != 0 && sigma[i] == 0) {
+                        sigma[i] = 0.5 * sigma.Where(fi => fi != 0).Min();
+                        weight[i] = 1.0d / sigma[i];
+                    } else if (mean[i] == 0) {
                         weight[i] = 0.0d;
                     } else {
-                        weight[i] = 1.0d / sigma;
+                        weight[i] = 1.0d / sigma[i];
                     }
                 }
                 NoramlizeWeights(weight);
