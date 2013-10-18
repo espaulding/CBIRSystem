@@ -10,7 +10,6 @@ namespace CBIR {
     public partial class ResultofSearch : Form {
         //set up global variables for class
         public const int IMAGES_PER_PAGE = 20;
-        public const string HISTOGRAM_FILE = "histogram.dat";
         ArrayList list; //list of PictureClass objects
         ArrayList weight; //the weight of each feature column in this round of relevance feedback
         frmSearch originalForm;
@@ -80,7 +79,7 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            list = CBIRfunctions.calculatePictures(imageFoldPath, HISTOGRAM_FILE, queryPic, distanceFunc, features, weight, list);
+            list = CBIRfunctions.calculatePictures(imageFoldPath, queryPic, distanceFunc, features, weight, list);
 
             //re-sort the list of images by their distances
             List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();

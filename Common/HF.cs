@@ -12,7 +12,7 @@ namespace CBIR
     {
         public static void Serialize(string filename, ISerializable objectToSerialize)
         {
-            Stream stream = File.Open(filename, FileMode.Create);
+            Stream stream = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.None);
             BinaryFormatter bFormatter = new BinaryFormatter();
             bFormatter.Serialize(stream, objectToSerialize);
             stream.Close();
@@ -21,7 +21,7 @@ namespace CBIR
         public static ISerializable DeSerialize(string filename)
         {
             ISerializable objectToSerialize;
-            Stream stream = File.Open(filename, FileMode.Open);
+            Stream stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
             BinaryFormatter bFormatter = new BinaryFormatter();
             objectToSerialize = (ISerializable)bFormatter.Deserialize(stream);
             stream.Close();

@@ -9,68 +9,117 @@ namespace CBIR {
     static public class CBIRfunctions {
         private const int COLOR_CODE_BIN_COUNT = 64;
         private const int INTENSITY_BIN_COUNT = 25;
+        public const string HISTOGRAM_FILE = "imageFeatures.dat";
 
         #region preprocessdata
 
         //This function finds the feature vectors for each picture as necessary
         //and then calculats the distance that each picture is from the query image
-        public static ArrayList calculatePictures(string imageFoldPath, string HISTOGRAM_FILE, string qFilename, int distanceFunc, 
+        public static ArrayList calculatePictures(string imageFoldPath, string qFilename, int distanceFunc,
                                                   bool[] features, ArrayList weight, ArrayList oldlist) {
             //displacement by rows, columns used by texture features
             int dr = 1, dc = 1; //hardcoded for now but maybe a parameter later
             ArrayList list;
             //if there is no oldlist start making a new one, but otherwise alias the old list as the new one
-            if (oldlist == null) {
-                list = new ArrayList();
-            } else {
-                list = oldlist;
-            }
-            bool histogramFileUPdated = false; //keep track if we update the histogram db by adding or removing an image file
+            if (oldlist == null) { list = new ArrayList(); } else { list = oldlist; }
 
             DirectoryInfo dir = new DirectoryInfo(imageFoldPath);
             string dbFile = imageFoldPath + "\\" + HISTOGRAM_FILE;
 
             HistogramDB db = null;
+
             //read the existing histogram file if there is one
-            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); } else { db = new HistogramDB(); }
+            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); } else {  db = new HistogramDB(); }
 
-            //make sure the query image is in the db first
-            if (!db.sizeDB.ContainsKey(qFilename)) {
-                DBAddPicture(imageFoldPath + "\\" + qFilename, qFilename, 0L, db, dr, dc);
+            //if we found a new picture in the folder rebuild the database so that every picture is normalized correctly
+            if (UpdateDB(db, dir, list)) {
+                RebuildDB(ref db, dir, dr, dc);
+                if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
+                db.NormalizeFeatures(); //normalize each feature over a gaussian distribution
+                if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
+                HF.Serialize(dbFile, db); //save the new db since we had to rebuild it
             }
-            ArrayList qFeatures = SelectFeatures(db, qFilename, features);
 
+            //update picture distances
+            ArrayList qFeatures = SelectFeatures(db, qFilename, features);
+            foreach (var file in dir.GetFiles("*.jpg")) {            
+                ArrayList picFeatures = SelectFeatures(db, file.Name, features);
+
+                //find the picture object in the old list that matches the current file being processed
+                PictureClass pic = list.OfType<PictureClass>().Single(p => p.name == file.Name);
+                pic.distance = CalculateDist(qFeatures, picFeatures, weight, distanceFunc);
+            }
+
+            return list;
+        }
+
+        //re-aquire raw histograms for every image in the directory
+        static public void RebuildDB(ref HistogramDB db, DirectoryInfo dir, int dr, int dc) {
+            db = new HistogramDB();
+            foreach (var file in dir.GetFiles("*.jpg")) {
+                DBAddPicture(file.FullName, file.Name, file.Length, db, dr, dc);
+            }
+        }
+
+        //possible scenarios
+        //-db doesn't needs to be updated
+        //  any file in the db but not the list is added to the list if it's found in the folder
+        //-different file, but named the same as an old file is in the folder
+        //  the old file is removed from the db and list, new file added to list, db gets fully rebuilt and saved over
+        //-a file was removed from the folder
+        //  absent item removed from list, can probably just keep the db as is
+        //-a file was added to the folder
+        //  new file gets added to list, db gets fully rebuilt and saved over
+        static public bool UpdateDB(HistogramDB db, DirectoryInfo dir, ArrayList list){
+            bool updated = false;
+            List<PictureClass> removed = new List<PictureClass>();
+
+            //check for pictures in the list that are missing in the db
+            foreach (PictureClass pic in list) {
+                //make a list of pictures that need to be removed from the list
+                if (!db.sizeDB.ContainsKey(pic.name)) {
+                    removed.Add(pic);
+                }
+            }
+
+            //anything in the removed list will be taken out of list
+            foreach (PictureClass pic in removed) {
+                list.Remove(pic);
+            }
+
+            //anything in the folder that's missing from or changed in the db should be added to the list
             foreach (var file in dir.GetFiles("*.jpg")) {
                 //look the file up in the current histogram data
                 if (db.sizeDB.ContainsKey(file.Name) && !(db.sizeDB[file.Name] == file.Length)) { //we've seen this image before
                     db.Remove(file.Name); //the file changed size so delete it from our DB 
                 }
 
-                if (!db.sizeDB.ContainsKey(file.Name)) { //we've never seen this image or we just removed it
-                    histogramFileUPdated = true;        //so process it from scratch and add to the db
-                    DBAddPicture(file.FullName, file.Name, file.Length, db, dr, dc);
-                }
-
-                ArrayList picFeatures = SelectFeatures(db, file.Name, features);
-                if (file.Name.Equals(qFilename)) { qFeatures = picFeatures; }
-
-                //there is no old list so build the new one as we go
-                if (oldlist == null) {
-                    PictureClass pic = new PictureClass(file.Name, file.FullName, file.Length, false,
-                                                        CalculateDist(qFeatures, picFeatures, weight, distanceFunc));
+                if (!db.sizeDB.ContainsKey(file.Name)) {
+                    PictureClass pic = new PictureClass(file.Name, file.FullName, file.Length, false, 0);
+                    list.Remove(pic);
                     list.Add(pic);
-                } else {
-                    //find the picture object in the old list that matches the current file being processed
-                    PictureClass pic = oldlist.OfType<PictureClass>().Single(p => p.name == file.Name);
-
-                    //update its distance
-                    pic.distance = CalculateDist(qFeatures, picFeatures, weight, distanceFunc);
+                    updated = true;
                 }
             }
 
-            //changes were made to the histogram data so save over the old stuff
-            if (histogramFileUPdated) { HF.Serialize(dbFile, db); }
-            return list;
+            //anything in the db but missing from list needs to be added to list
+            //this would track something in the db that's not actually present in the folder right 
+            //  now, but it checks for the file before adding it to the list.
+            //this is also critical if the db is loaded for the first time because the list will be empty
+            foreach (string pic in db.sizeDB.Keys) {
+                //is this key in the list?
+                // -yes, then do nothing
+                // -no, ok we need to make a picture object and add it
+                if (!ListContainsPic(list, pic)) {
+                    string fullpath = dir.ToString() + "\\" + pic;
+                    if (File.Exists(fullpath)) {
+                        FileInfo f = new FileInfo(fullpath);
+                        PictureClass p = new PictureClass(f.Name, f.FullName, f.Length, false, 0);
+                        list.Add(p);
+                    }
+                }
+            }
+            return updated;
         }
 
         //features[] => intensity, color-code, energy, entropy, contrast
@@ -81,6 +130,7 @@ namespace CBIR {
             if (features[2]) { combined.Add(db.textureDB[filename][0]); } //energy
             if (features[3]) { combined.Add(db.textureDB[filename][1]); } //entropy
             if (features[4]) { combined.Add(db.textureDB[filename][2]); } //contrast
+            //NormalizeGaussian(combined);
             return combined;
         }
 
@@ -137,35 +187,35 @@ namespace CBIR {
         }
 
         //get the intensity histogram
-        static public ArrayList CalcIntensityHist(Bitmap myImg) {
+        static public ArrayList CalcIntensityHist(Bitmap picture) {
             double I;
             int intensity;
             ArrayList hist = new ArrayList(INTENSITY_BIN_COUNT);
             for (int x = 0; x < hist.Capacity; x++) { hist.Add(0.0); }
 
-            for (int x = 0; x < myImg.Width; x++) {
-                for (int y = 0; y < myImg.Height; y++) {
-                    I = CalcIntensity(myImg.GetPixel(x, y));
+            for (int x = 0; x < picture.Width; x++) {
+                for (int y = 0; y < picture.Height; y++) {
+                    I = CalcIntensity(picture.GetPixel(x, y));
                     intensity = (int)Math.Floor(I / 10);
                     if (intensity > (INTENSITY_BIN_COUNT - 1)) { intensity = INTENSITY_BIN_COUNT - 1; } //don't let 250 and up move out of the histogram
                     hist[intensity] = (double)hist[intensity] + 1.0;
                 }
             }
 
-            NormalizeBySize(hist, myImg.Width * myImg.Height);
+            NormalizeBySize(hist, picture.Width * picture.Height);
             return hist;
         }
 
         //get the color-code histogram
-        static public ArrayList CalcColorCodeHist(Bitmap myImg) {
+        static public ArrayList CalcColorCodeHist(Bitmap picture) {
             Color p;
             ArrayList hist = new ArrayList(COLOR_CODE_BIN_COUNT);
             for (int x = 0; x < hist.Capacity; x++) { hist.Add(0.0); }
             string RED, GREEN, BLUE;
             int bin;
-            for (int x = 0; x < myImg.Width; x++) {
-                for (int y = 0; y < myImg.Height; y++) {
-                    p = myImg.GetPixel(x, y);
+            for (int x = 0; x < picture.Width; x++) {
+                for (int y = 0; y < picture.Height; y++) {
+                    p = picture.GetPixel(x, y);
 
                     //convert to base 2 and add leading zeros up until we have 8 digits
                     RED = Convert.ToString(p.R, 2).PadLeft(8, '0');
@@ -178,7 +228,7 @@ namespace CBIR {
                 }
             }
 
-            NormalizeBySize(hist, myImg.Width * myImg.Height);
+            NormalizeBySize(hist, picture.Width * picture.Height);
             return hist;
         }
 
@@ -299,7 +349,7 @@ namespace CBIR {
         #region helperfunctions
 
         //get initial weights such that all weights sum to 1 and are equal
-        public static ArrayList GetInitialWeights(bool[] features) {
+        static public ArrayList GetInitialWeights(bool[] features) {
             int vectorLength = 0;
             if (features[0]) { vectorLength += INTENSITY_BIN_COUNT; }
             if (features[1]) { vectorLength += COLOR_CODE_BIN_COUNT; }
@@ -316,7 +366,7 @@ namespace CBIR {
         //p = 1 is manhattan distance function
         //p = 2 is euclidean distance function
         //p = higher increases side-effects between dimensions
-        public static double CalculateDist(ArrayList Qhistogram, ArrayList histogram, ArrayList weight, int p) {
+        static private double CalculateDist(ArrayList Qhistogram, ArrayList histogram, ArrayList weight, int p) {
             double distance = 0.0;
             if (p <= 0) { throw new Exception("Invalid distance function P must be > 0"); }
             if (Qhistogram.Count != histogram.Count) { throw new Exception("invalid histograms given to distance measure."); }
@@ -337,13 +387,16 @@ namespace CBIR {
             ArrayList intensityHist = CBIRfunctions.CalcIntensityHist(picture);
             ArrayList colorCodeHist = CBIRfunctions.CalcColorCodeHist(picture);
             ArrayList textureHist = CBIRfunctions.CalcTextureFeatures(picture, dr, dc);
-            ArrayList all = new ArrayList();
-            all.AddRange(intensityHist); all.AddRange(colorCodeHist); all.AddRange(textureHist);
-            NormalizeGaussian(all);
-            db.Add(name, filesize, all.GetRange(0, intensityHist.Count),
-                                   all.GetRange(intensityHist.Count, colorCodeHist.Count),
-                                   all.GetRange(colorCodeHist.Count, textureHist.Count));
+            db.Add(name, filesize, intensityHist, colorCodeHist, textureHist);
             picture.Dispose();
+        }
+
+        static private bool ListContainsPic(ArrayList list, string pic) {
+            bool exists = false;
+            foreach (PictureClass p in list) {
+                if (p.name.Equals(pic)) { exists = true; }
+            }
+            return exists;
         }
 
         #endregion
