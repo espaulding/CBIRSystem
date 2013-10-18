@@ -36,7 +36,8 @@ namespace CBIR {
             if (UpdateDB(db, dir, list)) {
                 RebuildDB(ref db, dir, dr, dc);
                 if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
-                db.NormalizeFeatures(); //normalize each feature over a gaussian distribution
+                db.NormalizeByFeatures(); //normalize each feature over a gaussian distribution
+                //db.NormalizeByGlobal(); //normalize by the database's global mean and standard deviation over a gaussian distribution
                 if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
                 HF.Serialize(dbFile, db); //save the new db since we had to rebuild it
             }
@@ -176,7 +177,7 @@ namespace CBIR {
                 //update the weights
                 for (int i = 0; i < S; i++) {
                     if (mean[i] != 0 && sigma[i] == 0) {
-                        sigma[i] = 0.5 * sigma.Where(fi => fi != 0).Min();
+                        sigma[i] = 0.5 * sigma.Where(stddev => stddev != 0).Min();
                         weight[i] = 1.0d / sigma[i];
                     } else if (mean[i] == 0) {
                         weight[i] = 0.0d;

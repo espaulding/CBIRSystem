@@ -177,9 +177,7 @@ namespace CBIR {
 
         #region Gallery
 
-        //this function is used to display the results of the search to the screen
-        //TODO: fix so that the last page doesn't have errors when the total number
-        //      of images is not divisable by 20
+        //this function is used to display the results of the search
         public void DisplayImageResults() {
             //offset used to scan through the list and get the right pictures based on the current page we are on 
             int offSet = page * IMAGES_PER_PAGE;
@@ -196,14 +194,14 @@ namespace CBIR {
                     box.Height = img.Height;
                     box.Image = img;
                 } else {
-                    //if we are past the array or image does not exist them set image in picturebox to null and path to null
-                    ((PictureClass)list[pic + offSet]).path = null;
+                    //if we are past the array or image does not exist them set image in picturebox to null to null
                     box.Image = null;
                 }
             }
             DisplayRelevantImages();
         }
 
+        //this function is used to display the which images are marked as relevant
         public void DisplayRelevantImages() {
             //offset used to scan through the list and get the right pictures based on the current page we are on 
             int offSet = page * IMAGES_PER_PAGE;
