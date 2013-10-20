@@ -49,7 +49,7 @@ namespace CBIR {
 
         //basically a form_load function to initialize the form as it's brought up
         //function to search through database based on the Query Picture sent in
-        public void doSearch(string queryPicture, string folderPath) {
+        public void DoSearch(string queryPicture, string folderPath) {
             imageFoldPath = folderPath;
             queryPic = queryPicture;
 
@@ -78,12 +78,13 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-
-            //update the weights for the next search
-            if (cbRelevanceFeedback.Checked) { CBIRfunctions.AdjustWeights(weight, features, list, imageFoldPath); }
+            bool memoizedDB = true;
+            //***RESULTS OF MEMOIZATION***
+            //if the database is memoized all values will converge to zero, but at different rates, causing some features to drop off early
+            //if the database is not memoized the weights will cycle radically presenting rediculous results every other round or so
 
             //do the search
-            CBIRfunctions.calculatePictures(imageFoldPath, queryPic, distanceFunc, features, weight, ref list);
+            CBIRfunctions.RankPictures(queryPic, distanceFunc, weight, features, list, cbRelevanceFeedback.Checked, memoizedDB);
 
             //re-sort the list of images by their distances
             List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();
@@ -243,15 +244,18 @@ namespace CBIR {
 
         //mark every picture as not relevant and reset weights on all features
         private void InitNewSearch() {
-            if (list != null) {
-                //wipe out any old information concerning whether a picture is relevant or not
-                for (int c = 0; c < list.Count; c++) {
-                    ((PictureClass)list[c]).relevant = false;
+            if (imageFoldPath != null) {
+                CBIRfunctions.RefreshDB(imageFoldPath, ref list, false);
+                if (list != null) {
+                    //wipe out any old information concerning whether a picture is relevant or not
+                    for (int c = 0; c < list.Count; c++) {
+                        ((PictureClass)list[c]).relevant = false;
+                    }
                 }
+                bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
+                weight = CBIRfunctions.GetInitialWeights(features);
+                if (list != null) { DisplayRelevantImages(); }
             }
-            bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            weight = CBIRfunctions.GetInitialWeights(features);
-            if (list != null) { DisplayRelevantImages(); }
         }
 
         #endregion //Gallery

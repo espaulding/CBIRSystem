@@ -14,7 +14,7 @@ namespace CBIR {
             //set the label to the file name
             Bitmap myImg = (Bitmap)Bitmap.FromFile(filepath);
             lblImage.Text = filename;
-            lblDist.Text = distance.ToString("0.#####");
+            lblDist.Text = distance.ToString("0.####################");
             Size s = new Size(myImg.Width + 16, myImg.Height + 78);
             this.Size = s; this.MinimumSize = s;
             pbDisplay.Image = myImg;

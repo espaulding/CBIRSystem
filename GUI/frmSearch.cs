@@ -52,7 +52,7 @@ namespace CBIR {
             lblProcess.Visible = true;
             this.Refresh();
             resultForm.State = this.State;
-            resultForm.doSearch(qFile, path);
+            resultForm.DoSearch(qFile, path);
             resultForm.Show();
             this.Hide();
             btnSearch.Visible = true;
