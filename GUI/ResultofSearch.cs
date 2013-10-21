@@ -10,11 +10,17 @@ namespace CBIR {
     public partial class ResultofSearch : Form {
         //set up global variables for class
         public const int IMAGES_PER_PAGE = 20;
+        public const bool MEMOIZED_DB = false;
+        //***RESULTS OF MEMOIZATION***
+        //if the database is memoized all values will converge to zero, but at different rates, causing some features to drop off early
+        //if the database is not memoized the weights will oscillate radically presenting rediculous results every other round or so
+
         ArrayList list; //list of PictureClass objects
         ArrayList weight; //the weight of each feature column in this round of relevance feedback
         frmSearch originalForm;
-        int page, totalPages, distanceFunc = 1;
-        string imageFoldPath, queryPic;
+        private int page, totalPages, distanceFunc = 1;
+        private string imageFoldPath, queryPic;
+        
 
         //form class constructor
         public ResultofSearch(frmSearch form) {
@@ -78,21 +84,7 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            bool memoizedDB = true;
-            //***RESULTS OF MEMOIZATION***
-            //if the database is memoized all values will converge to zero, but at different rates, causing some features to drop off early
-            //if the database is not memoized the weights will cycle radically presenting rediculous results every other round or so
-
-            //do the search
-            CBIRfunctions.RankPictures(queryPic, distanceFunc, weight, features, list, cbRelevanceFeedback.Checked, memoizedDB);
-
-            //re-sort the list of images by their distances
-            List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();
-            for (int x = 0; x < list.Count; x++) { list[x] = sorted[x]; }
-
-            //calculate the number of pages needed if we want 20 pictures per page
-            totalPages = (int)Math.Ceiling(list.Count / (double)IMAGES_PER_PAGE);
-            pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
+            CBIRfunctions.RankPictures(queryPic, distanceFunc, weight, features, list, cbRelevanceFeedback.Checked, MEMOIZED_DB);
             DisplayImageResults();
         }
 
@@ -151,17 +143,18 @@ namespace CBIR {
         }
 
         //set program to use manhattan distance function
-        private void rbManhattan_CheckedChanged(object sender, EventArgs e) {
-            if (rbManhattan.Checked) {
-                distanceFunc = 1;
+        private void rbDistFunction_CheckedChanged(object sender, EventArgs e) {
+            RadioButton rb = (RadioButton)sender;
+            if (rb.Name.Equals("rbManhattan")) {
+                distanceFunc = 1; //P == 1 is manhattan dist
+            } else {
+                distanceFunc = 2; //P == 2 is euclidean dist
             }
-        }
-
-        //set program to use euclidean distance function
-        private void rbEuclidean_CheckedChanged(object sender, EventArgs e) {
-            if (rbEuclidean.Checked) {
-                distanceFunc = 2;
-            }
+            //recalc just the distances
+            bool relevanceFeedback = false; //make this false because we don't want to change the weights here
+            bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
+            CBIRfunctions.RankPictures(queryPic, distanceFunc, weight, features, list, relevanceFeedback, MEMOIZED_DB);
+            DisplayImageResults();
         }
 
         //turn relevance feedback on and off
@@ -180,6 +173,14 @@ namespace CBIR {
 
         //this function is used to display the results of the search
         public void DisplayImageResults() {
+            //re-sort the list of images by their distances
+            List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();
+            for (int x = 0; x < list.Count; x++) { list[x] = sorted[x]; }
+
+            //calculate the number of pages needed if we want 20 pictures per page
+            totalPages = (int)Math.Ceiling(list.Count / (double)IMAGES_PER_PAGE);
+            pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
+
             //offset used to scan through the list and get the right pictures based on the current page we are on 
             int offSet = page * IMAGES_PER_PAGE;
 

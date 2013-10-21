@@ -508,7 +508,7 @@
             this.rbEuclidean.TabStop = true;
             this.rbEuclidean.Text = "Euclidean Distance";
             this.rbEuclidean.UseVisualStyleBackColor = true;
-            this.rbEuclidean.CheckedChanged += new System.EventHandler(this.rbEuclidean_CheckedChanged);
+            this.rbEuclidean.CheckedChanged += new System.EventHandler(this.rbDistFunction_CheckedChanged);
             // 
             // rbManhattan
             // 
@@ -521,7 +521,7 @@
             this.rbManhattan.TabStop = true;
             this.rbManhattan.Text = "Manhattan Distance";
             this.rbManhattan.UseVisualStyleBackColor = true;
-            this.rbManhattan.CheckedChanged += new System.EventHandler(this.rbManhattan_CheckedChanged);
+            this.rbManhattan.CheckedChanged += new System.EventHandler(this.rbDistFunction_CheckedChanged);
             // 
             // gbGallery
             // 

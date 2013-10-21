@@ -114,7 +114,7 @@ namespace CBIR {
                 }
             }
 
-            return energy;
+            return FixFloatingPoint(energy,"1.0E-15");
         }
 
         //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the entropy
@@ -126,7 +126,7 @@ namespace CBIR {
                 }
             }
 
-            return entropy;
+            return FixFloatingPoint(entropy, "1.0E-15");
         }
 
         //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the entropy
@@ -138,7 +138,7 @@ namespace CBIR {
                 }
             }
 
-            return contrast;
+            return FixFloatingPoint(contrast, "1.0E-15"); ;
         }
 
         //given an image and a displacement vector (dr,dc) find the co-occurrence matrix
@@ -401,8 +401,8 @@ namespace CBIR {
 
                 //find the means and sigmas, one for each feature (row)
                 for (int i = 0; i < S; i++) {
-                    mean.Add(FixFloatingPoint(matrix[i].Sum() / N));
-                    sigma.Add(FixFloatingPoint(Math.Sqrt(matrix[i].Sum(fi => (fi - mean[i]) * (fi - mean[i])) / (N - 1))));
+                    mean.Add(FixFloatingPoint(matrix[i].Sum() / N, "1.0E-10"));
+                    sigma.Add(FixFloatingPoint(Math.Sqrt(matrix[i].Sum(fi => (fi - mean[i]) * (fi - mean[i])) / (N - 1)), "1.0E-10"));
                 }
 
                 //update the weights
@@ -419,7 +419,7 @@ namespace CBIR {
                     } else {                   //adjust weight so that features with less variance get more emphasis
                         weight[i] = 1.0d / sigma[i];
                     }
-                    weight[i] = FixFloatingPoint((double)weight[i]);
+                    weight[i] = FixFloatingPoint((double)weight[i], "1.0E-15");
                 }
                 //set any placeholders weights to the max weight
                 for (int i = 0; i < S; i++) { if ((double)weight[i] == -1) { weight[i] = weight.OfType<double>().Max(); } }
@@ -432,7 +432,7 @@ namespace CBIR {
             foreach (string pic in db.sizeDB.Keys) {
                 ArrayList selected = SelectFeatures(pic, features);
                 for (int i = 0; i < selected.Count; i++) {
-                    double weightedValue = FixFloatingPoint((double)weight[i] * (double)selected[i]);
+                    double weightedValue = FixFloatingPoint((double)weight[i] * (double)selected[i], "1.0E-15");
                     UpdateMemoizedDBValues(weightedValue, i, pic, features);
                 }
             }
@@ -443,7 +443,7 @@ namespace CBIR {
             double sum = weight.OfType<double>().Sum();
             if (sum != 0) {
                 for (int i = 0; i < weight.Count; i++) {
-                    weight[i] = FixFloatingPoint((double)weight[i] / sum);
+                    weight[i] = FixFloatingPoint((double)weight[i] / sum, "5.0E-8");
                 }
             }
         }
@@ -453,9 +453,9 @@ namespace CBIR {
         #region helperfunctions
 
         //any number smaller than the limit will be rounded to zero
-        static private double FixFloatingPoint(double d) {
+        static private double FixFloatingPoint(double d, string threshold) {
             double limit = 0;
-            Double.TryParse("1.0E-100", out limit);
+            Double.TryParse(threshold, out limit);
             if (Math.Abs(d) <= limit) { d = 0.0d; }
             return d;
         }
