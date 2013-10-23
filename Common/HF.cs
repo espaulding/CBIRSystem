@@ -37,6 +37,12 @@ namespace CBIR {
 
         //any number smaller than the threshold will be rounded to zero
         //threshold should be a string in scientific notation like "1.0E-10"
+        static public decimal FixFloatingPoint(decimal number, string threshold) {
+            return Convert.ToDecimal(FixFloatingPoint((double)number, threshold));
+        }
+
+        //any number smaller than the threshold will be rounded to zero
+        //threshold should be a string in scientific notation like "1.0E-10"
         static public float FixFloatingPoint(float number, string threshold) {
             return (float)FixFloatingPoint((double)number, threshold);
         }

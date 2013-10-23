@@ -42,7 +42,7 @@ namespace CBIR.UnitTests {
 
             try {
                 Bitmap i = Properties.Resources.testImage;
-                Dictionary<int, Dictionary<int, double>> com = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
+                Dictionary<int, Dictionary<int, int>> com = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
                 if (com[25][234] != 1) { testresult += "Failed: expected cell (25,234) to be 1  but got " + com[25][234] + NL; checks = false; }
             } catch (Exception ex) {
                 testresult += "Failed: with Exception " + ex.Message + NL;
@@ -53,33 +53,33 @@ namespace CBIR.UnitTests {
         }
 
         public static string TextureTest() {
-            string testresult = "Energy Function Test" + NL;
+            string testresult = "Texture Function Tests" + NL;
             bool checks = true;
 
             try {
                 Bitmap i = Properties.Resources._1;
-                Dictionary<int, Dictionary<int, double>> com = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
-                Dictionary<int, Dictionary<int, double>> ngtcom = CBIRfunctions.CalcGrayTone(com);
+                Dictionary<int, Dictionary<int, int>> com = CBIRfunctions.CalcCoOccurrence(i, 1, 1);
+                Dictionary<int, Dictionary<int, decimal>> ngtcom = CBIRfunctions.CalcGrayTone(com);
 
                 //check the energy of the gray tone matrix
-                double energy = CBIRfunctions.CalcEnergy(ngtcom);
-                if (energy != 0.0013484656311732802) { //value for _1
+                decimal energy = CBIRfunctions.CalcEnergy(ngtcom);
+                if (energy != 0.00134846563117319592173122M) { //value for _1
                     //from Min0.0014
                     testresult += "Failed: expected energy 0.0014 but got " + energy + NL;
                     checks = false;
                 }
 
                 //check the entropy of the gray tone matrix
-                double entropy = CBIRfunctions.CalcEntropy(ngtcom);
-                if (entropy != -11.386328337500963) { //value for _1
+                decimal entropy = CBIRfunctions.CalcEntropy(ngtcom);
+                if (entropy != -11.386328337502404133415248541M) { //value for _1
                     //from Min -11.3853  maybe she typoed the 6 into a 5
                     testresult += "Failed: expected entropy -11.3853 but got " + entropy + NL;
                     checks = false;
                 }
 
                 //check the contrast of the gray tone matrix
-                double contrast = CBIRfunctions.CalcContrast(ngtcom);
-                if (contrast != 159.03649209031443) { //value for _1
+                decimal contrast = CBIRfunctions.CalcContrast(ngtcom);
+                if (contrast != 159.03649209030870833973292201M) { //value for _1
                     //from Min  159.0272  slight difference here too
                     testresult += "Failed: expected contrast 159.0272 but got " + contrast + NL;
                     checks = false;
