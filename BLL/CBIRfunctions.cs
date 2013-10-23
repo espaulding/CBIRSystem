@@ -12,7 +12,7 @@ namespace CBIR {
         //and then calculats the distance that each picture is from the query image
         //this is the big cheese right here
         //the whole point of CBIR is to call this function get the query results by updating the distances in the list objects
-        static public void RankPictures(FeaturesDB db, string qFilename, int distanceFunc, bool[] features, ArrayList list, bool feedback) {
+        static public void RankPictures(FeaturesDB db, string qFilename, int distanceFunc, bool[] features, List<ImageMetaData> list, bool feedback) {
             db.SynchDB(list);
             List<decimal> weight = GetInitialWeights(features); //get unbiased weights
             GetPictureByName(list, qFilename).relevant = true; //the query image is always relevant
@@ -218,7 +218,7 @@ namespace CBIR {
         //if this matrix has less than 2 columns set weight to the balanced initial weights
         //otherwise find the standard deviation of each row (features) and adjust the weights
         //CRITICAL this function assumes that the database file is in SYNC with the list of PictureClass objects
-        static private void AdjustWeights(FeaturesDB db, List<decimal> weight, bool[] features, ArrayList list) {
+        static private void AdjustWeights(FeaturesDB db, List<decimal> weight, bool[] features, List<ImageMetaData> list) {
             if (list == null || db == null) { return; } //stop immediately the function has been prematurely called
             //possibly consider throwing an exception here rather than quietly ignoring the call
 
@@ -228,7 +228,7 @@ namespace CBIR {
 
             //build the matrix of relevant images with selected features
             foreach (string pic in db.sizeDB.Keys) {
-                if (list.OfType<ImageMetaData>().Single(p => p.name == pic).relevant) {
+                if (list.Single(p => p.name == pic).relevant) {
                     ArrayList selected = db.SelectFeatures(pic, features);
                     for (int i = 0; i < selected.Count; i++) { matrix[i].Add((decimal)selected[i]); }
                 }
@@ -286,7 +286,7 @@ namespace CBIR {
 
         //linear search through list to find picture metadata object by name
         //returns null if no matching data is found
-        static public ImageMetaData GetPictureByName(ArrayList list, string name) {
+        static public ImageMetaData GetPictureByName(List<ImageMetaData> list, string name) {
             ImageMetaData result = null;
             foreach (ImageMetaData pic in list) {
                 if (pic.name.Equals(name)) { result = pic; }

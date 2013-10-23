@@ -69,12 +69,12 @@ namespace CBIR {
 
         //undo any DB modifications caused by relevance feedback by either reloading the DB from a file
         //or if necessary rebuild it from scratch, computing all the feature metadata again
-        static public FeaturesDB LoadDB(DirectoryInfo folder, string filename, ref ArrayList oldlist, bool forceRebuild) {
+        static public FeaturesDB LoadDB(DirectoryInfo folder, string filename, ref List<ImageMetaData> oldlist, bool forceRebuild) {
             string dbfile = folder.FullName + "\\" + filename;
 
             //if there is no oldlist start making a new one, but otherwise alias the old list as the new list
-            ArrayList list = null;
-            if (oldlist == null) { list = new ArrayList(); oldlist = list; } else { list = oldlist; }
+            List<ImageMetaData> list = null;
+            if (oldlist == null) { list = new List<ImageMetaData>(); oldlist = list; } else { list = oldlist; }
 
             FeaturesDB db = new FeaturesDB(folder,filename);
             if (forceRebuild) { db.RebuildDB(); }
@@ -85,7 +85,7 @@ namespace CBIR {
         }
 
         //add new items to the database as needed, and synch the db up with list of picture metadata
-        public void SynchDB(ArrayList list) {
+        public void SynchDB(List<ImageMetaData> list) {
             //possible scenarios
             //-different file, but named the same as an old file is in the folder; ACTION: the old file is removed from the db and list, new file gets added
             //-a file was added to the folder; ACTION: new file gets added to the db and the list

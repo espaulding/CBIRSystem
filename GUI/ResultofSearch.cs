@@ -12,7 +12,7 @@ namespace CBIR {
         public const int IMAGES_PER_PAGE = 20;
         public const string HISTOGRAM_FILE = "imageFeatures.dat";
 
-        ArrayList list; //list of ImageMetaData objects
+        List<ImageMetaData> list; //list of ImageMetaData objects
         FeaturesDB db; //the database of image feature data
         frmSearch originalForm;
         private int page, totalPages, distanceFunc = 1;
