@@ -184,8 +184,8 @@ namespace CBIR {
                     //get the image from the file using the file path and create thumbnail of it
                     Bitmap img = (Bitmap)Bitmap.FromFile(((ImageMetaData)list[pic + offSet]).path);
                     img = HF.ScaleImage(img, 0, 95);
-                    box.Width = img.Width;
-                    box.Height = img.Height;
+                    box.Width = img.Width + 4;
+                    box.Height = img.Height + 4;
                     box.Image = img;
                 } else {
                     //if we are past the array or image does not exist them set image in picturebox to null to null
@@ -204,41 +204,67 @@ namespace CBIR {
                 //check to make sure we are still with in the array and picture exists
                 if ((pic + offSet) < list.Count && File.Exists(((ImageMetaData)list[pic + offSet]).path)) {
                     //set the relevant checkbox for this image... checkboxs are in the gallery.Controls [20,39]
-                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = ((ImageMetaData)list[pic + offSet]).relevant;
+                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = list[pic + offSet].relevant;
                     ((CheckBox)gbGallery.Controls[pic + 20]).Visible = cbRelevanceFeedback.Checked;
+                    if (list[pic + offSet].relevant) {
+                        gbGallery.Controls[pic].BackColor = Color.Green;
+                    } else {
+                        gbGallery.Controls[pic].BackColor = Color.Red;
+                    }
                 } else {
+                    //use the form's color if relevance feedback is off or there is no image for the box
                     ((CheckBox)gbGallery.Controls[pic + 20]).Visible = false;
+                    gbGallery.Controls[pic].BackColor = this.BackColor;
                 }
             }
         }
 
         //Pop open a new form with a full size version of the thumbnail that was just clicked
-        private void PictureBox_Click(object sender, EventArgs e) {
+        private void PictureBox_Click(object sender, MouseEventArgs e) {
             PictureBox pic = (PictureBox)sender;
             int number;
             Int32.TryParse(pic.Name.Substring(10, 2), out number);
             int gNumber = --number + IMAGES_PER_PAGE * page;
 
-            if (gNumber < list.Count && list[gNumber] != null) {
-                ImageMetaData objPicData = (ImageMetaData)list[gNumber];
-                frmDisplayPicture displayForm = new frmDisplayPicture();
-                displayForm.displayPicture(objPicData.path, objPicData.name, objPicData.distance);
-                displayForm.Show();
+            if (e.Button == MouseButtons.Left) {
+                ToggleRelevant(number, gNumber, !list[gNumber].relevant);
+            }
+            if (e.Button == MouseButtons.Right) {
+                if (gNumber < list.Count && list[gNumber] != null) {
+                    ImageMetaData objPicData = (ImageMetaData)list[gNumber];
+                    frmDisplayPicture displayForm = new frmDisplayPicture();
+                    displayForm.displayPicture(objPicData.path, objPicData.name, objPicData.distance);
+                    displayForm.Show();
+                }
             }
         }
 
         //toggle a picture as relevant or not relevant
         private void cbRelevant_CheckedChanged(object sender, EventArgs e) {
             CheckBox pic = (CheckBox)sender;
-            int number;
+            int number = -1;
             Int32.TryParse(pic.Name.Substring(10, 2), out number);
             int gNumber = --number + IMAGES_PER_PAGE * page;
-            if (((ImageMetaData)list[gNumber]).name.Equals(queryPic)) {
-                pic.Checked = true; //the query image is always relevant
-                ((ImageMetaData)list[gNumber]).relevant = true;
+            ToggleRelevant(number, gNumber, pic.Checked);
+        }
+
+        private void ToggleRelevant(int number, int gNumber, bool relevant) {
+            
+            if (list[gNumber].name.Equals(queryPic)) {
+                ((CheckBox)gbGallery.Controls[number + 20]).Checked = true; //the query image is always relevant
+                list[gNumber].relevant = true;
+                gbGallery.Controls[number].BackColor = Color.Green;
             } else {
                 if (gNumber < list.Count) {
-                    ((ImageMetaData)list[gNumber]).relevant = pic.Checked;
+                    list[gNumber].relevant = relevant;
+                    if (list[gNumber].relevant) {
+                        gbGallery.Controls[number].BackColor = Color.Green;
+                    } else {
+                        gbGallery.Controls[number].BackColor = Color.Red;
+                    }
+                } else {
+                    //use the form's color if there is no image for this box
+                    gbGallery.Controls[number].BackColor = this.BackColor;
                 }
             }
         }
