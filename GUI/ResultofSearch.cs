@@ -206,10 +206,14 @@ namespace CBIR {
                     //set the relevant checkbox for this image... checkboxs are in the gallery.Controls [20,39]
                     ((CheckBox)gbGallery.Controls[pic + 20]).Checked = list[pic + offSet].relevant;
                     ((CheckBox)gbGallery.Controls[pic + 20]).Visible = cbRelevanceFeedback.Checked;
-                    if (list[pic + offSet].relevant) {
-                        gbGallery.Controls[pic].BackColor = Color.Green;
+                    if (cbRelevanceFeedback.Checked) {
+                        if (list[pic + offSet].relevant) {
+                            gbGallery.Controls[pic].BackColor = Color.Green;
+                        } else {
+                            gbGallery.Controls[pic].BackColor = Color.Red;
+                        }
                     } else {
-                        gbGallery.Controls[pic].BackColor = Color.Red;
+                        gbGallery.Controls[pic].BackColor = this.BackColor;
                     }
                 } else {
                     //use the form's color if relevance feedback is off or there is no image for the box
