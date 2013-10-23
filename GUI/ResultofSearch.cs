@@ -10,8 +10,10 @@ namespace CBIR {
     public partial class ResultofSearch : Form {
         //set up global variables for class
         public const int IMAGES_PER_PAGE = 20;
+        public const string HISTOGRAM_FILE = "imageFeatures.dat";
 
-        ArrayList list; //list of PictureClass objects
+        ArrayList list; //list of ImageMetaData objects
+        FeaturesDB db; //the database of image feature data
         frmSearch originalForm;
         private int page, totalPages, distanceFunc = 1;
         private string queryPic;
@@ -20,7 +22,7 @@ namespace CBIR {
         //form class constructor
         public ResultofSearch(frmSearch form) {
             //initialize information when form is created
-            originalForm = form;
+            originalForm = form;    
             InitializeComponent();
         }
 
@@ -49,7 +51,7 @@ namespace CBIR {
         #region FormAndControlEvents
 
         //basically a form_load function to initialize the form as it's brought up
-        //function to search through database based on the Query Picture sent in
+        //also complete the first search with default settings
         public void DoSearch(string queryPicture, string folderPath) {
             imageFolder = new DirectoryInfo(folderPath);
             queryPic = queryPicture;
@@ -79,7 +81,7 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            CBIRfunctions.RankPictures(imageFolder, queryPic, distanceFunc, features, list, cbRelevanceFeedback.Checked);
+            CBIRfunctions.RankPictures(db, queryPic, distanceFunc, features, list, cbRelevanceFeedback.Checked);
 
             //re-sort the list of images by the distances found during ranking
             List<ImageMetaData> sorted = list.OfType<ImageMetaData>().OrderBy(pic => pic.distance).ToList<ImageMetaData>();
@@ -245,7 +247,8 @@ namespace CBIR {
         private void InitNewSearch() {
             if (imageFolder != null) {
                 bool forceRebuild = false; //true will cause LoadDB to recompute all features rather than loading from file
-                CBIRfunctions.LoadDB(imageFolder, ref list, forceRebuild);
+
+                db = FeaturesDB.LoadDB(imageFolder, HISTOGRAM_FILE, ref list, forceRebuild);
                 if (list != null) {
                     //wipe out any old information concerning whether a picture is relevant or not
                     for (int c = 0; c < list.Count; c++) {
