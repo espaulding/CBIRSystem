@@ -71,8 +71,8 @@
       <DependentUpon>frmSearch.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\HF.cs" />
-    <Compile Include="BLL\HistogramDB.cs" />
-    <Compile Include="BLL\PictureClass.cs" />
+    <Compile Include="BLL\FeaturesDB.cs" />
+    <Compile Include="BLL\ImageMetaData.cs" />
     <Compile Include="ProgramLauncher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\CBIRTests.cs" />

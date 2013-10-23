@@ -10,17 +10,12 @@ namespace CBIR {
     public partial class ResultofSearch : Form {
         //set up global variables for class
         public const int IMAGES_PER_PAGE = 20;
-        public const bool MEMOIZED_DB = false;
-        //***RESULTS OF MEMOIZATION***
-        //if the database is memoized all values will converge to zero, but at different rates, causing some features to drop off early
-        //if the database is not memoized the weights will oscillate radically presenting rediculous results every other round or so
 
         ArrayList list; //list of PictureClass objects
-        ArrayList weight; //the weight of each feature column in this round of relevance feedback
         frmSearch originalForm;
         private int page, totalPages, distanceFunc = 1;
-        private string imageFoldPath, queryPic;
-        
+        private string queryPic;
+        DirectoryInfo imageFolder;
 
         //form class constructor
         public ResultofSearch(frmSearch form) {
@@ -56,12 +51,12 @@ namespace CBIR {
         //basically a form_load function to initialize the form as it's brought up
         //function to search through database based on the Query Picture sent in
         public void DoSearch(string queryPicture, string folderPath) {
-            imageFoldPath = folderPath;
+            imageFolder = new DirectoryInfo(folderPath);
             queryPic = queryPicture;
 
             //display the query image
-            pbQueryPicture.Image = HF.reScaleImage(Bitmap.FromFile(imageFoldPath + "\\" + queryPicture),
-                                                   pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
+            pbQueryPicture.Image = HF.ScaleImage(Bitmap.FromFile(imageFolder.FullName + "\\" + queryPicture),
+                                                 pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
 
             InitNewSearch();
             btnSearch_Click(new object(), new EventArgs());
@@ -84,7 +79,12 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            CBIRfunctions.RankPictures(queryPic, distanceFunc, weight, features, list, cbRelevanceFeedback.Checked, MEMOIZED_DB);
+            CBIRfunctions.RankPictures(imageFolder, queryPic, distanceFunc, features, list, cbRelevanceFeedback.Checked);
+
+            //re-sort the list of images by the distances found during ranking
+            List<ImageMetaData> sorted = list.OfType<ImageMetaData>().OrderBy(pic => pic.distance).ToList<ImageMetaData>();
+            for (int x = 0; x < list.Count; x++) { list[x] = sorted[x]; }
+
             DisplayImageResults();
         }
 
@@ -138,8 +138,6 @@ namespace CBIR {
             } else {
                 btnSearch.Enabled = false;
             }
-
-            InitNewSearch();
         }
 
         //set program to use manhattan distance function
@@ -150,11 +148,7 @@ namespace CBIR {
             } else {
                 distanceFunc = 2; //P == 2 is euclidean dist
             }
-            //recalc just the distances
-            bool relevanceFeedback = false; //make this false because we don't want to change the weights here
-            bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            CBIRfunctions.RankPictures(queryPic, distanceFunc, weight, features, list, relevanceFeedback, MEMOIZED_DB);
-            DisplayImageResults();
+            btnSearch_Click(sender, e);
         }
 
         //turn relevance feedback on and off
@@ -173,10 +167,6 @@ namespace CBIR {
 
         //this function is used to display the results of the search
         public void DisplayImageResults() {
-            //re-sort the list of images by their distances
-            List<PictureClass> sorted = list.OfType<PictureClass>().OrderBy(pic => pic.distance).ToList<PictureClass>();
-            for (int x = 0; x < list.Count; x++) { list[x] = sorted[x]; }
-
             //calculate the number of pages needed if we want 20 pictures per page
             totalPages = (int)Math.Ceiling(list.Count / (double)IMAGES_PER_PAGE);
             pageLabel.Text = "Page " + (page + 1) + "/Out of " + totalPages;
@@ -188,10 +178,10 @@ namespace CBIR {
             for (int pic = 0; pic < IMAGES_PER_PAGE; pic++) {
                 PictureBox box = (PictureBox)gbGallery.Controls[pic]; //pictureboxes are in the gallery.Controls [0,19]
                 //check to make sure we are still with in the array and picture exists
-                if ((pic + offSet) < list.Count && File.Exists(((PictureClass)list[pic + offSet]).path)) {
+                if ((pic + offSet) < list.Count && File.Exists(((ImageMetaData)list[pic + offSet]).path)) {
                     //get the image from the file using the file path and create thumbnail of it
-                    Bitmap img = (Bitmap)Bitmap.FromFile(((PictureClass)list[pic + offSet]).path);
-                    img = HF.reScaleImage(img, 0, 95, "height");
+                    Bitmap img = (Bitmap)Bitmap.FromFile(((ImageMetaData)list[pic + offSet]).path);
+                    img = HF.ScaleImage(img, 0, 95);
                     box.Width = img.Width;
                     box.Height = img.Height;
                     box.Image = img;
@@ -210,11 +200,12 @@ namespace CBIR {
 
             for (int pic = 0; pic < IMAGES_PER_PAGE; pic++) {
                 //check to make sure we are still with in the array and picture exists
-                if ((pic + offSet) < list.Count && File.Exists(((PictureClass)list[pic + offSet]).path)) {
+                if ((pic + offSet) < list.Count && File.Exists(((ImageMetaData)list[pic + offSet]).path)) {
                     //set the relevant checkbox for this image... checkboxs are in the gallery.Controls [20,39]
-                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = ((PictureClass)list[pic + offSet]).relevant;
+                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = ((ImageMetaData)list[pic + offSet]).relevant;
+                    ((CheckBox)gbGallery.Controls[pic + 20]).Visible = cbRelevanceFeedback.Checked;
                 } else {
-                    ((PictureClass)list[pic + offSet]).relevant = false; //TODO: hmm does this really make sense?
+                    ((CheckBox)gbGallery.Controls[pic + 20]).Visible = false;
                 }
             }
         }
@@ -226,8 +217,8 @@ namespace CBIR {
             Int32.TryParse(pic.Name.Substring(10, 2), out number);
             int gNumber = --number + IMAGES_PER_PAGE * page;
 
-            if (list[gNumber] != null) {
-                PictureClass objPicData = (PictureClass)list[gNumber];
+            if (gNumber < list.Count && list[gNumber] != null) {
+                ImageMetaData objPicData = (ImageMetaData)list[gNumber];
                 frmDisplayPicture displayForm = new frmDisplayPicture();
                 displayForm.displayPicture(objPicData.path, objPicData.name, objPicData.distance);
                 displayForm.Show();
@@ -240,21 +231,27 @@ namespace CBIR {
             int number;
             Int32.TryParse(pic.Name.Substring(10, 2), out number);
             int gNumber = --number + IMAGES_PER_PAGE * page;
-            ((PictureClass)list[gNumber]).relevant = pic.Checked;
+            if (((ImageMetaData)list[gNumber]).name.Equals(queryPic)) {
+                pic.Checked = true; //the query image is always relevant
+                ((ImageMetaData)list[gNumber]).relevant = true;
+            } else {
+                if (gNumber < list.Count) {
+                    ((ImageMetaData)list[gNumber]).relevant = pic.Checked;
+                }
+            }
         }
 
         //mark every picture as not relevant and reset weights on all features
         private void InitNewSearch() {
-            if (imageFoldPath != null) {
-                CBIRfunctions.RefreshDB(imageFoldPath, ref list, false);
+            if (imageFolder != null) {
+                bool forceRebuild = false; //true will cause LoadDB to recompute all features rather than loading from file
+                CBIRfunctions.LoadDB(imageFolder, ref list, forceRebuild);
                 if (list != null) {
                     //wipe out any old information concerning whether a picture is relevant or not
                     for (int c = 0; c < list.Count; c++) {
-                        ((PictureClass)list[c]).relevant = false;
+                        ((ImageMetaData)list[c]).relevant = false;
                     }
                 }
-                bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-                weight = CBIRfunctions.GetInitialWeights(features);
                 if (list != null) { DisplayRelevantImages(); }
             }
         }

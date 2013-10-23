@@ -37,7 +37,7 @@ namespace CBIR {
                 //open the file from the dialog and show it in the picute box
                 queryFileName = ofdLoadPicture.FileName;
                 Bitmap myImg = (Bitmap)Bitmap.FromFile(queryFileName);
-                pbQueryPicture.Image = HF.reScaleImage(myImg, pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
+                pbQueryPicture.Image = HF.ScaleImage(myImg, pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
                 btnSearch.Enabled = true;
             }
         }

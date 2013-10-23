@@ -2,7 +2,7 @@
 using System;
 
 namespace CBIR {
-    class PictureClass {
+    public class ImageMetaData {
         //set up important information about picture
         public string name;
         public string path;
@@ -11,7 +11,7 @@ namespace CBIR {
         public bool relevant;
 
         //when object create set values to the ones passed in
-        public PictureClass(string name, string path, long size, bool relevant,double dist) {
+        public ImageMetaData(string name, string path, long size, bool relevant,double dist) {
             this.name = name;
             this.path = path;
             this.size = size;

@@ -24,7 +24,7 @@ namespace CBIR {
         }
 
         private void frmDisplayPicture_ResizeEnd(object sender, EventArgs e) {
-            pbDisplay.Image = HF.reScaleImage(pbDisplay.Image, pbDisplay.Width, pbDisplay.Height, "noscale");
+            pbDisplay.Image = HF.ScaleImage(pbDisplay.Image, pbDisplay.Width, pbDisplay.Height, "noscale");
         }
 
         private void pbDisplay_Paint(object sender, PaintEventArgs e) {

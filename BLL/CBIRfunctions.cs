@@ -10,27 +10,30 @@ namespace CBIR {
         private const int COLOR_CODE_BIN_COUNT = 64;
         private const int INTENSITY_BIN_COUNT = 25;
         public const string HISTOGRAM_FILE = "imageFeatures.dat";
+        public const int DR = 1, DC = 1; //displacement by rows, columns used by texture features
 
         //memoize the DB so that it can be updated between relevance feedback rounds
-        static private DirectoryInfo dir = null;
-        static private HistogramDB db = null;
+        static private FeaturesDB db = null;
 
         //This function finds the feature vectors for each picture as necessary
         //and then calculats the distance that each picture is from the query image
         //this is the big cheese right here
         //the whole point of CBIR is to call this function get the query results by updating the distances in the list objects
-        static public void RankPictures(string qFilename, int distanceFunc, ArrayList weight, bool[] features, ArrayList list, bool feedback, bool memoizedDB) {
-            if (feedback) { AdjustWeights(weight, features, list, memoizedDB); } 
+        static public void RankPictures(DirectoryInfo folder, string qFilename, int distanceFunc, bool[] features, ArrayList list, bool feedback) {
+            SynchDB(folder, DR, DC, list);
+            ArrayList weight = GetInitialWeights(features); //get unbiased weights
+            GetPictureByName(list, qFilename).relevant = true; //the query image is always relevant
+            if (feedback) { AdjustWeights(weight, features, list); } //bias weights with selected features of relevant images
 
             //update picture distances
             ArrayList qFeatures = SelectFeatures(qFilename, features);
-            foreach (var file in dir.GetFiles("*.jpg")) {
+            foreach (var file in folder.GetFiles("*.jpg")) {
                 ArrayList picFeatures = SelectFeatures(file.Name, features);
 
                 //find the picture object in the old list that matches the current file being processed
-                PictureClass pic = list.OfType<PictureClass>().Single(p => p.name == file.Name);
-                pic.distance = CalculateDist(qFeatures, picFeatures, weight, distanceFunc);
-            }            
+                ImageMetaData pic = list.OfType<ImageMetaData>().Single(p => p.name == file.Name);
+                pic.distance = GetMinkowskiDist(qFeatures, picFeatures, weight, distanceFunc);
+            }
         }
 
         #region generatefeatures
@@ -52,7 +55,7 @@ namespace CBIR {
             }
 
             //allow true comparison between images of different sizes
-            NormalizeBySize(hist, picture.Width * picture.Height); 
+            NormalizeBySize(hist, picture.Width * picture.Height);
             return hist;
         }
 
@@ -114,7 +117,7 @@ namespace CBIR {
                 }
             }
 
-            return FixFloatingPoint(energy,"1.0E-15");
+            return HF.FixFloatingPoint(energy, "1.0E-15");
         }
 
         //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the entropy
@@ -126,7 +129,7 @@ namespace CBIR {
                 }
             }
 
-            return FixFloatingPoint(entropy, "1.0E-15");
+            return HF.FixFloatingPoint(entropy, "1.0E-15");
         }
 
         //given a Normalized Gray-Tone Co-Occurrence Matrix, com, find the entropy
@@ -138,7 +141,7 @@ namespace CBIR {
                 }
             }
 
-            return FixFloatingPoint(contrast, "1.0E-15"); ;
+            return HF.FixFloatingPoint(contrast, "1.0E-15"); ;
         }
 
         //given an image and a displacement vector (dr,dc) find the co-occurrence matrix
@@ -186,7 +189,7 @@ namespace CBIR {
             //normalize each value by the sum. i.e. uniform distribution
             foreach (KeyValuePair<int, Dictionary<int, double>> row in com) {
                 //instantiate the column and add it to the current row
-                gray.Add(row.Key, new Dictionary<int, double>()); 
+                gray.Add(row.Key, new Dictionary<int, double>());
 
                 //normalize and add the com value to the ngtcom
                 foreach (KeyValuePair<int, double> col in row.Value) {
@@ -203,105 +206,104 @@ namespace CBIR {
 
         //undo any DB modifications caused by relevance feedback by either reloading the DB from a file
         //or if necessary rebuild it from scratch, computing all the feature metadata again
-        static public void RefreshDB(string imageFoldPath, ref ArrayList oldlist, bool forceRebuild) {
-            //displacement by rows, columns used by texture features
-            int dr = 1, dc = 1; //hardcoded for now but maybe a parameter later
-            dir = new DirectoryInfo(imageFoldPath);
-            string dbFile = imageFoldPath + "\\" + HISTOGRAM_FILE;
+        static public void LoadDB(DirectoryInfo folder, ref ArrayList oldlist, bool forceRebuild) {
+            string dbFile = folder.FullName + "\\" + HISTOGRAM_FILE;
 
-            //if there is no oldlist start making a new one, but otherwise alias the old list as the new one
+            //if there is no oldlist start making a new one, but otherwise alias the old list as the new list
             ArrayList list = null;
             if (oldlist == null) { list = new ArrayList(); oldlist = list; } else { list = oldlist; }
 
-            db = null;
-            //read the existing histogram file if there is one
-            if (File.Exists(dbFile)) { db = (HistogramDB)HF.DeSerialize(dbFile); } else { db = new HistogramDB(); }
-
-            //if we found a new picture in the folder rebuild the database so that 
-            //gaussian normalization can be reapplied over all the features
-            if (UpdateDB(list) || forceRebuild) {
-                RebuildDB(dr, dc); //new images found, so rebuild the db from scratch
-                if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
-                db.NormalizeByFeatures(); //normalize each feature over a gaussian distribution
-                //db.NormalizeByGlobal(); //normalize by the database's global mean and standard deviation over a gaussian distribution
-                if (db.CheckData()) { throw new Exception("There are bad numbers in the database. (NaN, Infinity, etc)"); }
-                HF.Serialize(dbFile, db); //save the new db since we had to rebuild it
+            db = null; //wipe out any db information that may have been in memory
+            if (!forceRebuild) {
+                if (File.Exists(dbFile)) { db = (FeaturesDB)HF.DeSerialize(dbFile); } else { db = new FeaturesDB(); }
+                SynchDB(folder, DR, DC, list);
+            } else {
+                RebuildDB(folder, DR, DC);
             }
         }
 
         //re-aquire raw histograms for every image in the directory
         //this is the computational bottleneck for the entire software program
         //writing the data to file alleviates most of the issue, but it takes too long to build a new DB.
-        static private void RebuildDB(int dr, int dc) {
-            db = new HistogramDB();
-            foreach (var file in dir.GetFiles("*.jpg")) {
-                DBAddPicture(file.FullName, file.Name, file.Length, db, dr, dc);
+        static private void RebuildDB(DirectoryInfo folder, int dr, int dc) {
+            db = new FeaturesDB();
+            foreach (var file in folder.GetFiles("*.jpg")) {
+                DBAddPicture(file.FullName, file.Name, file.Length, dr, dc);
             }
+            //make sure the data in the db doesn't contain bad data and then normalize each feature
+            if (db.CheckData()) { throw new Exception("Database is corrupted. Entries set to (NaN, Infinity, etc)"); }
+            HF.Serialize(folder.FullName + "\\" + HISTOGRAM_FILE, db); //save the new db since it just got rebuilt
+            db.NormalizeByFeatures(); //normalize each feature over a gaussian distribution
         }
 
-        //possible scenarios
-        //-db doesn't needs to be updated
-        //  any file in the db but not the list is added to the list if it's found in the folder
-        //-different file, but named the same as an old file is in the folder
-        //  the old file is removed from the db and list, new file added to list, db gets fully rebuilt and saved over
-        //-a file was removed from the folder
-        //  absent item removed from list, can probably just keep the db as is
-        //-a file was added to the folder
-        //  new file gets added to list, db gets fully rebuilt and saved over
-        static private bool UpdateDB(ArrayList list) {
+        //add new items to the database as needed, and synch the db up with list of picture metadata
+        static private void SynchDB(DirectoryInfo folder, int dr, int dc, ArrayList list) {
+            //possible scenarios
+            //-different file, but named the same as an old file is in the folder; ACTION: the old file is removed from the db and list, new file gets added
+            //-a file was added to the folder; ACTION: new file gets added to the db and the list
+            //-a file was removed from the folder; ACTION: absent item removed from list and db
             bool updated = false;
-            List<PictureClass> removed = new List<PictureClass>();
+            List<string> removed = new List<string>();
+            List<ImageMetaData> added = new List<ImageMetaData>();
+            string dbFile = folder.FullName + "\\" + HISTOGRAM_FILE;
 
-            //check for pictures in the list that are missing in the db
-            foreach (PictureClass pic in list) {
-                //make a list of pictures that need to be removed from the list
-                if (!db.sizeDB.ContainsKey(pic.name)) {
-                    removed.Add(pic);
-                }
-            }
-
-            //anything in the removed list will be taken out of list
-            foreach (PictureClass pic in removed) {
-                list.Remove(pic);
-            }
-
-            //anything in the folder that's missing from or changed in the db should be added to the list
-            foreach (var file in dir.GetFiles("*.jpg")) {
-                //look the file up in the current histogram data
-                if (db.sizeDB.ContainsKey(file.Name) && !(db.sizeDB[file.Name] == file.Length)) { //we've seen this image before
+            //anything new in the folder should be added to the list and the db
+            foreach (var file in folder.GetFiles("*.jpg")) {
+                if (db.sizeDB.ContainsKey(file.Name) && !(db.sizeDB[file.Name] == file.Length)) {
                     db.Remove(file.Name); //the file changed size so delete it from our DB 
                 }
 
                 if (!db.sizeDB.ContainsKey(file.Name)) {
-                    PictureClass pic = new PictureClass(file.Name, file.FullName, file.Length, false, 0);
-                    list.Remove(pic);
-                    list.Add(pic);
                     updated = true;
+                    added.Add(new ImageMetaData(file.Name, file.FullName, file.Length, false, 0));
                 }
             }
 
             //anything in the db but missing from list needs to be added to list
-            //this would track something in the db that's not actually present in the folder right 
-            //  now, but it checks for the file before adding it to the list.
-            //this is also critical if the db is loaded for the first time because the list will be empty
+            //critical if the db is loaded for the first time(application start) because the list will be empty
             foreach (string pic in db.sizeDB.Keys) {
-                //is this key in the list?
-                // -yes, then do nothing
-                // -no, ok we need to make a picture object and add it
-                if (!ListContainsPic(list, pic)) {
-                    string fullpath = dir.ToString() + "\\" + pic;
+                if (GetPictureByName(list, pic) == null) {
+                    string fullpath = folder.ToString() + "\\" + pic;
                     if (File.Exists(fullpath)) {
                         FileInfo f = new FileInfo(fullpath);
-                        PictureClass p = new PictureClass(f.Name, f.FullName, f.Length, false, 0);
+                        ImageMetaData p = new ImageMetaData(f.Name, f.FullName, f.Length, false, 0);
                         list.Add(p);
+                    } else {
+                        updated = true;
+                        removed.Add(pic); //image is not in the folder anymore so delete from db and the list
                     }
                 }
             }
-            return updated;
+
+            //anything in the removed list will be taken out of list and the db
+            foreach (string pic in removed) {
+                db.Remove(pic);
+                list.Remove(GetPictureByName(list, pic));
+            }
+
+            //add new stuff in the folder to the db
+            if (added.Count > 0) {
+                //reload the db file before adding new stuff because we need the un-normalized db 
+                //so that everything in the db can be normalized together
+                if (File.Exists(dbFile)) { db = (FeaturesDB)HF.DeSerialize(dbFile); } else { db = new FeaturesDB(); }
+                foreach (ImageMetaData pic in added) {
+                    list.Remove(GetPictureByName(list, pic.name));
+                    list.Add(pic);
+                    DBAddPicture(pic.path, pic.name, pic.size, dr, dc);
+                }
+            }
+
+            //save changes to the dbFile
+            if (updated) {
+                //make sure the data in the db doesn't contain bad data and then normalize each feature
+                if (db.CheckData()) { throw new Exception("Database is corrupted. Entries set to (NaN, Infinity, etc)"); }
+                HF.Serialize(dbFile, db); //always save before normalization              
+            }
+            db.NormalizeByFeatures(); //normalize each feature over a gaussian distribution
         }
 
         //add a picture to the database
-        static private void DBAddPicture(string fullname, string name, long filesize, HistogramDB db, int dr, int dc) {
+        static private void DBAddPicture(string fullname, string name, long filesize, int dr, int dc) {
             Bitmap picture = (Bitmap)Bitmap.FromFile(fullname);
             ArrayList intensityHist = CBIRfunctions.CalcIntensityHist(picture);
             ArrayList colorCodeHist = CBIRfunctions.CalcColorCodeHist(picture);
@@ -310,8 +312,10 @@ namespace CBIR {
             picture.Dispose();
         }
 
-        //map selected features to the database and update it as the matrix is built
-        static private void UpdateMemoizedDBValues(double value, int index, string pic, bool[] features) {
+        //allow a specific feature of a specific picture to be set directly as the given value
+        //db[picture][feature] = value; where feature is a single number. Consider that color-code generates 64 features
+        //if this function is being used to fix a corrupted database, strongly consider saving the fixed database file
+        static private void UpdateDBValues(double value, int index, string pic, bool[] features) {
             //deal with cases where intensity is selected
             if (features[0]) {
                 if (index < INTENSITY_BIN_COUNT) {
@@ -367,11 +371,12 @@ namespace CBIR {
         }
 
         //generate a matrix with rows as selected features, and columns being images marked as relevant
-        //if this matrix has less than 2 columns leave the weights are they are
+        //if this matrix has less than 2 columns set weight to the balanced initial weights
         //otherwise find the standard deviation of each row (features) and adjust the weights
-        //CRITICAL this function assumes that the database file exists and that it is in SYNC with the list of PictureClass objects
-        static private void AdjustWeights(ArrayList weight, bool[] features, ArrayList list, bool memoizedDB) {
-            if (list == null) { return; } //stop immediately the function has been prematurely called
+        //CRITICAL this function assumes that the database file is in SYNC with the list of PictureClass objects
+        static private void AdjustWeights(ArrayList weight, bool[] features, ArrayList list) {
+            if (list == null || db == null) { return; } //stop immediately the function has been prematurely called
+            //possibly consider throwing an exception here rather than quietly ignoring the call
 
             //initialize the matrix: rows (features), columns (relevant images)
             List<double>[] matrix = new List<double>[weight.Count]; //rows are [], columns are List<double>
@@ -379,20 +384,13 @@ namespace CBIR {
 
             //build the matrix of relevant images with selected features
             foreach (string pic in db.sizeDB.Keys) {
-                if (list.OfType<PictureClass>().Single(p => p.name == pic).relevant) {
+                if (list.OfType<ImageMetaData>().Single(p => p.name == pic).relevant) {
                     ArrayList selected = SelectFeatures(pic, features);
                     for (int i = 0; i < selected.Count; i++) { matrix[i].Add((double)selected[i]); }
                 }
             }
 
-            //if not memoized, reset the DB from the file after building the matrix with the previous rounds adjustments
-            //which will allow the weights to propogate through the rounds
-            //***RESULTS OF MEMOIZATION***
-            //if the database is memoized all values will converge to zero, but at different rates
-            //if the database is not memoized the weights will cycle radically presenting rediculous results every other round or so
-            if (!memoizedDB) { RefreshDB(dir.FullName,ref list,false); }
-
-            //if we have at least 2 relevant pictures go ahead and adjust the weights; otherwise, don't do anything just leave the weights as they are
+            //if we have at least 2 relevant pictures go ahead and adjust the weights; otherwise, don't do anything
             if (matrix[0].Count > 1) {
                 List<double> mean = new List<double>();  //mean == average value, mean != median
                 List<double> sigma = new List<double>(); //sigma == standard deviation, sigma^2 == variance
@@ -401,11 +399,11 @@ namespace CBIR {
 
                 //find the means and sigmas, one for each feature (row)
                 for (int i = 0; i < S; i++) {
-                    mean.Add(FixFloatingPoint(matrix[i].Sum() / N, "1.0E-10"));
-                    sigma.Add(FixFloatingPoint(Math.Sqrt(matrix[i].Sum(fi => (fi - mean[i]) * (fi - mean[i])) / (N - 1)), "1.0E-10"));
+                    mean.Add(HF.FixFloatingPoint(matrix[i].Sum() / N, "1.0E-10"));
+                    sigma.Add(HF.FixFloatingPoint(Math.Sqrt(matrix[i].Sum(fi => (fi - mean[i]) * (fi - mean[i])) / (N - 1)), "1.0E-11"));
                 }
 
-                //update the weights
+                //update the weights         
                 for (int i = 0; i < S; i++) {
                     if (mean[i] != 0 && sigma[i] == 0) { //nonzero mean but the column has no variance: should get high weight
                         if (sigma.Where(stddev => stddev != 0).Count() > 0) {
@@ -419,22 +417,11 @@ namespace CBIR {
                     } else {                   //adjust weight so that features with less variance get more emphasis
                         weight[i] = 1.0d / sigma[i];
                     }
-                    weight[i] = FixFloatingPoint((double)weight[i], "1.0E-15");
+                    weight[i] = HF.FixFloatingPoint((double)weight[i], "1.0E-15");
                 }
                 //set any placeholders weights to the max weight
                 for (int i = 0; i < S; i++) { if ((double)weight[i] == -1) { weight[i] = weight.OfType<double>().Max(); } }
-                NoramlizeWeights(weight);  
-            }
-
-            //apply the selected feature weights to the entire database even the non relevant images or things will get weird fast
-            //if only the relevant images are updated in the db, those values will move towards 0
-            //while the nonrelevant images won't change causing the true ordering of each feature to be lost immediately
-            foreach (string pic in db.sizeDB.Keys) {
-                ArrayList selected = SelectFeatures(pic, features);
-                for (int i = 0; i < selected.Count; i++) {
-                    double weightedValue = FixFloatingPoint((double)weight[i] * (double)selected[i], "1.0E-15");
-                    UpdateMemoizedDBValues(weightedValue, i, pic, features);
-                }
+                NoramlizeWeights(weight);
             }
         }
 
@@ -443,7 +430,7 @@ namespace CBIR {
             double sum = weight.OfType<double>().Sum();
             if (sum != 0) {
                 for (int i = 0; i < weight.Count; i++) {
-                    weight[i] = FixFloatingPoint((double)weight[i] / sum, "5.0E-8");
+                    weight[i] = HF.FixFloatingPoint((double)weight[i] / sum, "5.0E-8");
                 }
             }
         }
@@ -452,67 +439,32 @@ namespace CBIR {
 
         #region helperfunctions
 
-        //any number smaller than the limit will be rounded to zero
-        static private double FixFloatingPoint(double d, string threshold) {
-            double limit = 0;
-            Double.TryParse(threshold, out limit);
-            if (Math.Abs(d) <= limit) { d = 0.0d; }
-            return d;
+        //linear search through list to find picture metadata object by name
+        //returns null if no matching data is found
+        static public ImageMetaData GetPictureByName(ArrayList list, string name) {
+            ImageMetaData result = null;
+            foreach (ImageMetaData pic in list) {
+                if (pic.name.Equals(name)) { result = pic; }
+            }
+            return result;
         }
 
         //p = 1 is manhattan distance function
         //p = 2 is euclidean distance function
         //p = higher increases side-effects between dimensions
-        static private double CalculateDist(ArrayList Qhistogram, ArrayList histogram, ArrayList weight, int p) {
-            double distance = 0.0;
+        static private double GetMinkowskiDist(ArrayList Qhistogram, ArrayList histogram, ArrayList weight, int p) {
+            decimal distance = 0; //use decimal for intermediate computations to help avoid floating point errors
             if (p <= 0) { throw new Exception("Invalid distance function P must be > 0"); }
             if (Qhistogram.Count != histogram.Count) { throw new Exception("invalid histograms given to distance measure."); }
             for (int i = 0; i < histogram.Count; i++) {
-                //don't multiply by weight here because it's being done in the matrix as the weights are adjusted
-                distance += Math.Pow(Math.Abs((double)Qhistogram[i] - (double)histogram[i]), p);
+                distance += Convert.ToDecimal(weight[i]) * Convert.ToDecimal(Math.Pow((double)Math.Abs(Convert.ToDecimal(Qhistogram[i]) - Convert.ToDecimal(histogram[i])), p));
             }
-            return Math.Pow(distance, (double)(1.0) / p);
+            return Math.Pow((double)distance, (double)(1.0) / p);
         }
 
         //find an intensity given RGB values
         static public double CalcIntensity(Color p) {
             return (.299 * p.R) + (.587 * p.G) + (.114 * p.B);
-        }
-
-        static private bool ListContainsPic(ArrayList list, string pic) {
-            bool exists = false;
-            foreach (PictureClass p in list) {
-                if (p.name.Equals(pic)) { exists = true; }
-            }
-            return exists;
-        }
-
-        //normlize the vector so that each feature is between [0,1]
-        static private void NormalizeUniform(ArrayList features) {
-            double min = features.OfType<double>().Min();
-            double max = features.OfType<double>().Max();
-
-            for (int f = 0; f < features.Count; f++) {
-                features[f] = ((double)features[f] - min) / (max - min);
-            }
-        }
-
-        //Intra-Normalization step and Inter-Normalization step combined not really following the article on this part
-        //normlize the vector so that each feature is between [-3,3]
-        static private void NormalizeGaussian(ArrayList features) {
-            // standard deviation is sqrt(sum((value - mean)^2) / (N-1)) where N is number of items in the vector
-            // see http://en.wikipedia.org/wiki/Standard_deviation#Discrete_random_variable for any questions
-
-            if (features.Count > 1) {
-                double mean = features.OfType<double>().Average(); //find the mean
-                double sigma = Math.Sqrt(features.OfType<double>().Sum(f => (f - mean) * (f - mean)) / (features.Count - 1));
-
-                if (sigma != 0) { //apply normalization       
-                    for (int f = 0; f < features.Count; f++) {
-                        features[f] = ((double)features[f] - mean) / (sigma);
-                    }
-                }
-            }
         }
 
         #endregion
