@@ -11,6 +11,7 @@ namespace CBIR {
         //set up global variables for class
         public const int IMAGES_PER_PAGE = 20;
         public const string HISTOGRAM_FILE = "imageFeatures.dat";
+        public const int BOX_HEIGHT = 110;
 
         List<ImageMetaData> list; //list of ImageMetaData objects
         FeaturesDB db; //the database of image feature data
@@ -155,11 +156,6 @@ namespace CBIR {
 
         //turn relevance feedback on and off
         private void cbRelevanceFeedback_CheckedChanged(object sender, EventArgs e) {
-            //toggle the feedback check boxes to display or not display
-            for (int c = 20; c < 40; c++) {
-                ((CheckBox)gbGallery.Controls[c]).Visible = cbRelevanceFeedback.Checked;
-            }
-
             InitNewSearch();
         }
 
@@ -180,12 +176,12 @@ namespace CBIR {
             for (int pic = 0; pic < IMAGES_PER_PAGE; pic++) {
                 PictureBox box = (PictureBox)gbGallery.Controls[pic]; //pictureboxes are in the gallery.Controls [0,19]
                 //check to make sure we are still with in the array and picture exists
-                if ((pic + offSet) < list.Count && File.Exists(((ImageMetaData)list[pic + offSet]).path)) {
+                if ((pic + offSet) < list.Count && File.Exists(list[pic + offSet].path)) {
                     //get the image from the file using the file path and create thumbnail of it
-                    Bitmap img = (Bitmap)Bitmap.FromFile(((ImageMetaData)list[pic + offSet]).path);
-                    img = HF.ScaleImage(img, 0, 95);
-                    box.Width = img.Width + 4;
-                    box.Height = img.Height + 4;
+                    Bitmap img = (Bitmap)Bitmap.FromFile(list[pic + offSet].path);
+                    img = HF.ScaleImage(img, 0, BOX_HEIGHT);
+                    box.Width = img.Width + box.Padding.Left + box.Padding.Right;
+                    box.Height = img.Height + box.Padding.Top + box.Padding.Bottom;
                     box.Image = img;
                 } else {
                     //if we are past the array or image does not exist them set image in picturebox to null to null
@@ -202,22 +198,23 @@ namespace CBIR {
 
             for (int pic = 0; pic < IMAGES_PER_PAGE; pic++) {
                 //check to make sure we are still with in the array and picture exists
-                if ((pic + offSet) < list.Count && File.Exists(((ImageMetaData)list[pic + offSet]).path)) {
+                if ((pic + offSet) < list.Count && File.Exists(list[pic + offSet].path)) {
                     //set the relevant checkbox for this image... checkboxs are in the gallery.Controls [20,39]
-                    ((CheckBox)gbGallery.Controls[pic + 20]).Checked = list[pic + offSet].relevant;
-                    ((CheckBox)gbGallery.Controls[pic + 20]).Visible = cbRelevanceFeedback.Checked;
                     if (cbRelevanceFeedback.Checked) {
-                        if (list[pic + offSet].relevant) {
-                            gbGallery.Controls[pic].BackColor = Color.Green;
+                        if (!list[pic].name.Equals(queryPic)) {
+                            if (list[pic + offSet].relevant) {
+                                gbGallery.Controls[pic].BackColor = Color.Green;
+                            } else {
+                                gbGallery.Controls[pic].BackColor = Color.Red;
+                            }
                         } else {
-                            gbGallery.Controls[pic].BackColor = Color.Red;
+                            gbGallery.Controls[pic].BackColor = Color.Green;
                         }
                     } else {
                         gbGallery.Controls[pic].BackColor = this.BackColor;
                     }
                 } else {
                     //use the form's color if relevance feedback is off or there is no image for the box
-                    ((CheckBox)gbGallery.Controls[pic + 20]).Visible = false;
                     gbGallery.Controls[pic].BackColor = this.BackColor;
                 }
             }
@@ -252,24 +249,27 @@ namespace CBIR {
             ToggleRelevant(number, gNumber, pic.Checked);
         }
 
+        //toggle a picturebox/picture as relevant or not
         private void ToggleRelevant(int number, int gNumber, bool relevant) {
-            
-            if (list[gNumber].name.Equals(queryPic)) {
-                ((CheckBox)gbGallery.Controls[number + 20]).Checked = true; //the query image is always relevant
-                list[gNumber].relevant = true;
-                gbGallery.Controls[number].BackColor = Color.Green;
-            } else {
-                if (gNumber < list.Count) {
-                    list[gNumber].relevant = relevant;
-                    if (list[gNumber].relevant) {
-                        gbGallery.Controls[number].BackColor = Color.Green;
-                    } else {
-                        gbGallery.Controls[number].BackColor = Color.Red;
-                    }
+            if (cbRelevanceFeedback.Checked) {
+                if (list[gNumber].name.Equals(queryPic)) {
+                    list[gNumber].relevant = true;
+                    gbGallery.Controls[number].BackColor = Color.Green;
                 } else {
-                    //use the form's color if there is no image for this box
-                    gbGallery.Controls[number].BackColor = this.BackColor;
+                    if (gNumber < list.Count) {
+                        list[gNumber].relevant = relevant;
+                        if (list[gNumber].relevant) {
+                            gbGallery.Controls[number].BackColor = Color.Green;
+                        } else {
+                            gbGallery.Controls[number].BackColor = Color.Red;
+                        }
+                    } else {
+                        //use the form's color if there is no image for this box
+                        gbGallery.Controls[number].BackColor = this.BackColor;
+                    }
                 }
+            } else {
+                gbGallery.Controls[number].BackColor = this.BackColor;
             }
         }
 
@@ -282,7 +282,10 @@ namespace CBIR {
                 if (list != null) {
                     //wipe out any old information concerning whether a picture is relevant or not
                     for (int c = 0; c < list.Count; c++) {
-                        ((ImageMetaData)list[c]).relevant = false;
+                        list[c].relevant = false;
+                        if (list[c].name.Equals(queryPic)) {
+                            list[c].relevant = true;
+                        }
                     }
                 }
                 if (list != null) { DisplayRelevantImages(); }
