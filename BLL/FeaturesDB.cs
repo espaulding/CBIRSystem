@@ -30,13 +30,21 @@ namespace CBIR {
         public string dbfullname;
 
         private FeaturesDB(DirectoryInfo folder, string dbfilename) {
-            intensityDB = new Dictionary<string, ArrayList>();
-            colorCodeDB = new Dictionary<string, ArrayList>();
-            textureDB = new Dictionary<string, ArrayList>();
-            sizeDB = new Dictionary<string, long>();
             this.folder = folder;
             this.dbname = dbfilename;
             this.dbfullname = folder.FullName + "\\" + dbfilename;
+            if (File.Exists(this.dbfullname)) {
+                FeaturesDB db = (FeaturesDB)HF.DeSerialize(this.dbfullname);
+                intensityDB = db.intensityDB;
+                colorCodeDB = db.colorCodeDB;
+                textureDB = db.textureDB;
+                sizeDB = db.sizeDB;
+            } else {
+                intensityDB = new Dictionary<string, ArrayList>();
+                colorCodeDB = new Dictionary<string, ArrayList>();
+                textureDB = new Dictionary<string, ArrayList>();
+                sizeDB = new Dictionary<string, long>();
+            }
         }
 
         #region serialization definition
@@ -47,9 +55,6 @@ namespace CBIR {
             this.intensityDB = (Dictionary<string, ArrayList>)info.GetValue("intensityHistograms", typeof(Dictionary<string, ArrayList>));
             this.colorCodeDB = (Dictionary<string, ArrayList>)info.GetValue("colorCodeHistograms", typeof(Dictionary<string, ArrayList>));
             this.textureDB = (Dictionary<string, ArrayList>)info.GetValue("textureHistograms", typeof(Dictionary<string, ArrayList>));
-            this.folder = (DirectoryInfo)info.GetValue("folder", typeof(DirectoryInfo));
-            this.dbname = info.GetString("dbname");
-            this.dbfullname = info.GetString("dbfullname");
         }
 
         //used by the serialization process so that serialize knows what to save
@@ -58,9 +63,6 @@ namespace CBIR {
             info.AddValue("intensityHistograms", this.intensityDB);
             info.AddValue("colorCodeHistograms", this.colorCodeDB);
             info.AddValue("textureHistograms", this.textureDB);
-            info.AddValue("folder", this.folder);
-            info.AddValue("dbname", this.dbname);
-            info.AddValue("dbfullname", this.dbfullname);
         }
 
         #endregion
@@ -78,14 +80,14 @@ namespace CBIR {
 
             FeaturesDB db = new FeaturesDB(folder,filename);
             if (forceRebuild) { db.RebuildDB(); }
-            if (File.Exists(dbfile)) { db = (FeaturesDB)HF.DeSerialize(dbfile); } else { db = new FeaturesDB(folder, filename); }
-            db.SynchDB(list);
+            db = new FeaturesDB(folder, filename);
+            db = db.SynchDB(list);
 
             return db;
         }
 
         //add new items to the database as needed, and synch the db up with list of picture metadata
-        public void SynchDB(List<ImageMetaData> list) {
+        public FeaturesDB SynchDB(List<ImageMetaData> list) {
             //possible scenarios
             //-different file, but named the same as an old file is in the folder; ACTION: the old file is removed from the db and list, new file gets added
             //-a file was added to the folder; ACTION: new file gets added to the db and the list
@@ -128,12 +130,12 @@ namespace CBIR {
                 list.Remove(CBIRfunctions.GetPictureByName(list, pic));
             }
 
+            FeaturesDB db = this;
             //add new stuff in the folder to the db
             if (added.Count > 0) {
                 //reload the db file before adding new stuff because we need the un-normalized db 
-                //so that everything in the db can be normalized together
-                FeaturesDB db = this;
-                if (File.Exists(dbname)) { db = (FeaturesDB)HF.DeSerialize(dbfullname); } else { db = new FeaturesDB(folder,dbname); }
+                //so that everything in the db can be normalized together          
+                if (normalized) { db = new FeaturesDB(folder, dbname); }
                 foreach (ImageMetaData pic in added) {
                     list.Remove(CBIRfunctions.GetPictureByName(list, pic.name));
                     list.Add(pic);
@@ -143,19 +145,21 @@ namespace CBIR {
 
             //save changes to the dbFile
             if (updated) {
-                HF.Serialize(dbfullname, this); //always save changes before normalization              
+                HF.Serialize(db.dbfullname, db); //always save changes before normalization              
             }
             NormalizeByFeatures(); //normalize each feature over a gaussian distribution
+            return db;
         }
 
         //re-aquire raw histograms and/or features for every image in the directory
         //this is the computational bottleneck for the entire software program
         //writing the data to file alleviates most of the issue, but it takes too long to build a new DB.
         private void RebuildDB() {
+            this.Clear();
             foreach (var file in folder.GetFiles("*.jpg")) {
-                AddImage(file.FullName, file.Name, file.Length, DR, DC);
+                this.AddImage(file.FullName, file.Name, file.Length, DR, DC);
             }
-            HF.Serialize(dbname, this); //save the new db since it just got rebuilt
+            HF.Serialize(this.dbfullname, this); //save the new db since it just got rebuilt
             NormalizeByFeatures(); //normalize each feature over a gaussian distribution
         }
 
