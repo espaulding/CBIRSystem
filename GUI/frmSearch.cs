@@ -13,7 +13,7 @@ namespace CBIR {
             InitializeComponent();
             this.State = new bool[][] { 
                             new bool[] { true, false },
-                            new bool[] { true },
+                            new bool[] { false },
                             new bool[] { true, true, true, true, true }
                          };
         }

@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Data;
 
 namespace CBIR {
     //HF == HelperFunctions
@@ -33,6 +34,131 @@ namespace CBIR {
 
         #endregion
 
+        #region consoleoutput
+
+        static public string PrintMatrix(bool[,] opt) {
+            string output = "   ";
+            int x = opt.GetLength(0), y = opt.GetLength(1);
+            for (int j = 0; j < y; j++) { output += string.Format("{0,3}", j.ToString()); }
+            for (int i = 0; i < x; i++) {
+                output += "\n" + string.Format("{0,3}", i.ToString());
+                for (int j = 0; j < y; j++) {
+                    if (opt[i, j]) { output += "  T"; } else { output += "  F"; }
+                }
+            }
+            return output;
+        }
+
+        static public string PrintMatrix(int[,] opt) {
+            string output = "    "; int len = output.Length;
+            string form = "{0,"+len+"}";
+            int x = opt.GetLength(0), y = opt.GetLength(1);
+            for (int j = 0; j < y; j++) { output += string.Format(form, j.ToString()); }
+            for (int i = 0; i < x; i++) {
+                output += "\n" + string.Format(form, i.ToString());
+                for (int j = 0; j < y; j++) {
+                    output += string.Format(form, opt[i,j].ToString());
+                }
+            }
+            return output;
+        }
+
+        static public string PrintMatrix(int[][] opt) {
+            string output = "     "; int len = output.Length;
+            string form = "{0," + len + "}";
+            int x = opt.Length, y = opt[0].Length;
+            for (int j = 0; j < y; j++) { output += string.Format(form, j.ToString()); }
+            for (int i = 0; i < x; i++) {
+                output += "\n" + string.Format(form, i.ToString());
+                for (int j = 0; j < y; j++) {
+                    output += string.Format(form, opt[i][j].ToString());
+                }
+            }
+            return output;
+        }
+
+        //assume matrix has the same number of columns in every row
+        static public string PrintMatrix(Dictionary<int, Dictionary<int, int>> opt) {
+            string output = "", headers = "    "; int len = headers.Length;
+            string form = "{0," + len + "}";
+            int x = opt.Count;
+            List<int> js = new List<int>();
+            foreach (int i in opt.Keys.OrderBy(ai => ai)) {
+                output += "\n" + string.Format(form, i.ToString());
+                foreach (int j in opt[i].Keys.OrderBy(aj => aj)) {
+                    js.Add(j);
+                    output += string.Format(form, opt[i][j].ToString());
+                }
+            }
+            foreach (int j in js.Distinct().OrderBy(aj => aj)) { headers += string.Format(form, j.ToString()); }
+            return headers + output;
+        }
+
+        //---------------------------------DataSetToString-----------------------------------------
+        //Description: turn a DataSet object into a neatly formated human readable string.
+        //-------------------------------------------------------------------------------
+        static public string DataSetToString(DataSet ds) {
+            //format the dataset into a human readable report
+            string sReport = "";
+            string sCell = "";
+            List<int> arrTabs = new List<int>();
+            int iTab = 1;
+            string sDelimChar = "";
+
+            try {
+                //get the field caption widths
+                for (int c = 0; c < (ds.Tables[0].Columns.Count); c++) {
+                    sCell = ds.Tables[0].Columns[c].Caption;
+                    arrTabs.Add(1);
+                }
+
+                //get widest field in each column
+                for (int r = 0; r < (ds.Tables[0].Rows.Count); r++) {
+                    for (int c = 0; c < (ds.Tables[0].Columns.Count); c++) {
+                        sCell = ds.Tables[0].Rows[r][c].ToString();
+                        if (sCell.Length == 0 || sCell.ToLower().Equals("null")) {
+                            sCell = "";
+                        }
+                        //if this field is longer than any previous field set it as the new column width
+                        if (sCell.Length >= arrTabs[c]) {
+                            arrTabs[c] = sCell.Length + 1;
+                        }
+                    }
+                }
+
+                //outloop to go through each row of the dataset
+                for (int r = 0; r < (ds.Tables[0].Rows.Count); r++) {
+                    sReport += System.Environment.NewLine;
+                    //innerloop to go through each field on a given row
+                    for (int c = 0; c < (ds.Tables[0].Columns.Count); c++) {
+                        iTab = arrTabs[c];
+                        sCell = ds.Tables[0].Rows[r][c].ToString();
+                        if (sCell.Length == 0) {
+                            sCell = "";
+                        }
+                        if (iTab >= sCell.Length) {
+                            sReport += sCell + Tab(iTab - sCell.Length);
+                        } else {
+                            sReport += sCell.Substring(0, iTab - 1);
+                        }
+                        if (c < ds.Tables[0].Columns.Count - 1) {
+                            sReport += sDelimChar;
+                        }
+                    }
+                }
+            } catch (Exception) {
+            }
+
+            return sReport;
+        }
+
+        static private string Tab(int n) {
+            string sTab = "                                                                ";
+            return sTab.Substring(0, n);
+        }
+
+        #endregion
+
         #region statistics
 
         //any number smaller than the threshold will be rounded to zero
@@ -52,7 +178,7 @@ namespace CBIR {
         static public double FixFloatingPoint(double number, string threshold) {
             double limit = 0;
             Double.TryParse(threshold, out limit);
-            if (Math.Abs(number) <= limit) { number = 0.0d; }
+            if (Math.Abs(number) < limit) { number = 0.0d; }
             return number;
         }
 
@@ -107,6 +233,24 @@ namespace CBIR {
             }
             return Math.Pow(distance, 1.0d / p);
         }
+
+        #endregion
+
+        #region decimalmath
+
+        //public static decimal Log(decimal a, decimal b) {
+        //    if (b == 1)
+        //        throw new Exception("Divide by zero. Log base can't be 1");
+        //    return (Log(a) / Log(b));
+        //}
+
+        //public static decimal Log(decimal a) {
+        //    decimal b = 10;
+        //    //decimal f = n / a; //find the ratio to factor out of the log base to match a
+        //    return a / f;
+        //}
+
+        //private static decimal nroot(decimal n, decimal b)
 
         #endregion
 

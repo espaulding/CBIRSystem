@@ -92,7 +92,8 @@ namespace CBIR {
         //get the texture features
         //they are always in the order: Energy, Entropy, Contrast
         static public ArrayList CalcTextureFeatures(Bitmap picture, int dr, int dc) {
-            Dictionary<int, Dictionary<int, decimal>> ngtcom = CalcGrayTone(CalcCoOccurrence(picture, dr, dc));
+            int[][] image = CalcIntensityMatrix(picture);
+            Dictionary<int, Dictionary<int, decimal>> ngtcom = CalcGrayTone(CalcCoOccurrence(image, dr, dc));
             ArrayList hist = new ArrayList(3);
             hist.Add(CalcEnergy(ngtcom));
             hist.Add(CalcEntropy(ngtcom));
@@ -132,28 +133,31 @@ namespace CBIR {
             decimal contrast = 0;
             foreach (KeyValuePair<int, Dictionary<int, decimal>> row in ngtcom) {
                 foreach (KeyValuePair<int, decimal> col in row.Value) {
-                    contrast += Convert.ToDecimal(Math.Pow(row.Key - col.Key, 2)) * col.Value; //(i - j)^2 N
+                    contrast += (row.Key - col.Key) * (row.Key - col.Key) * col.Value; //(i - j)^2 N
                 }
             }
 
             return contrast;
         }
 
-        //given an image and a displacement vector (dr,dc) find the co-occurrence matrix
-        //the upper left corner of the image is (0,0)
-        //dr is the displacement rows downward
-        //dc is the displacement columns to the right
-        static public Dictionary<int, Dictionary<int, int>> CalcCoOccurrence(Bitmap Img, int dr, int dc) {
+        //generate a matrix of intensity values 1 for each pixel in the image
+        static public int[][] CalcIntensityMatrix(Bitmap Img) {
             int[][] image = new int[Img.Height][]; //initalize matrix of intensity values
-            for (int r = 0; r < Img.Height; r++) { image[r] = new int[Img.Width]; }
-
             //build matrix with an intensity value for each pixel
             for (int r = 0; r < Img.Height; r++) {
+                image[r] = new int[Img.Width];
                 for (int c = 0; c < Img.Width; c++) {
                     image[r][c] = (int)CalcIntensity(Img.GetPixel(c, r));
                 }
             }
+            return image;
+        }
 
+        //given an image and a displacement vector (dr,dc) find the co-occurrence matrix
+        //the upper left corner of the image is (0,0)
+        //dr is the displacement rows downward
+        //dc is the displacement columns to the right
+        static public Dictionary<int, Dictionary<int, int>> CalcCoOccurrence(int[][] image, int dr, int dc) {
             //grab a sorted list of unique intensity values from the image
             int[] values = image.SelectMany(value => value).Distinct().OrderBy(value => value).ToArray();
 
@@ -188,7 +192,7 @@ namespace CBIR {
 
                 //normalize and add the com value to the ngtcom
                 foreach (KeyValuePair<int, int> col in row.Value) {
-                    gray[row.Key][col.Key] = Convert.ToDecimal(col.Value) / sum;
+                    gray[row.Key][col.Key] = HF.FixFloatingPoint(Convert.ToDecimal(col.Value) / sum, "1.0E-10");
                 }
             }
 

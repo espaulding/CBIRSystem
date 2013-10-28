@@ -22,9 +22,12 @@ namespace CBIR {
         public Dictionary<string, long> sizeDB;
         
         //globals for each instantiation
-        public bool normalized = false;
+        public bool normalizedGuassian = false;
+        public bool normalizedZeroToOne = false;
         public List<decimal> meanByFeature = new List<decimal>();
         public List<decimal> sigmaByFeature = new List<decimal>();
+        public List<decimal> maxByFeature = new List<decimal>();
+        public List<decimal> minByFeature = new List<decimal>();
         public DirectoryInfo folder;
         public string dbname;
         public string dbfullname;
@@ -80,7 +83,6 @@ namespace CBIR {
 
             FeaturesDB db = new FeaturesDB(folder,filename);
             if (forceRebuild) { db.RebuildDB(); }
-            db = new FeaturesDB(folder, filename);
             db = db.SynchDB(list);
 
             return db;
@@ -135,7 +137,7 @@ namespace CBIR {
             if (added.Count > 0) {
                 //reload the db file before adding new stuff because we need the un-normalized db 
                 //so that everything in the db can be normalized together          
-                if (normalized) { db = new FeaturesDB(folder, dbname); }
+                if (normalizedGuassian) { db = new FeaturesDB(folder, dbname); }
                 foreach (ImageMetaData pic in added) {
                     list.Remove(CBIRfunctions.GetPictureByName(list, pic.name));
                     list.Add(pic);
@@ -148,6 +150,8 @@ namespace CBIR {
                 HF.Serialize(db.dbfullname, db); //always save changes before normalization              
             }
             NormalizeByFeatures(); //normalize each feature over a gaussian distribution
+            //NormalizeByFeaturesZeroToOne(); //normalize each feature to the range [0..1] so such that the feature sums to 1
+                                              //Zero to One normalization by far does not Match Min's results
             return db;
         }
 
@@ -160,7 +164,6 @@ namespace CBIR {
                 this.AddImage(file.FullName, file.Name, file.Length, DR, DC);
             }
             HF.Serialize(this.dbfullname, this); //save the new db since it just got rebuilt
-            NormalizeByFeatures(); //normalize each feature over a gaussian distribution
         }
 
         #endregion
@@ -170,13 +173,13 @@ namespace CBIR {
         //use gaussian normalization
         //this method gets good results, but still isn't matching up with Min's sample output
         public void NormalizeByFeatures() {
-            if (normalized) { return; } //don't let the db get normalized more than once
+            if (normalizedGuassian) { return; } //don't let the db get normalized more than once
             ComputeStdDevByFeature();
-            List<string> record = intensityDB.Keys.ToList<string>();
+            List<string> record = sizeDB.Keys.ToList<string>();
             for (int c = 0; c < record.Count; c++) {
-                int intensity = intensityDB[record[c]].Count;
-                int colorcode = colorCodeDB[record[c]].Count + intensity;
-                int texture = textureDB[record[c]].Count + colorcode;
+                int intensity = INTENSITY_BIN_COUNT;
+                int colorcode = COLOR_CODE_BIN_COUNT + intensity;
+                int texture = TEXTURE_BIN_COUNT + colorcode;
                 //decimal outlierCutoff = 4.5; //anything greater than 3 stdev from the mean is 1% of a gaussian distribution
                                             //however many features are falling 5 and 6 stdev which is a clear demonstration of how
                                             //poorly the gaussian distribution actually approximates these features
@@ -185,6 +188,10 @@ namespace CBIR {
                 for (int i = 0; i < intensity; i++) {
                     if (intensityDB[record[c]].Count > 1 && (decimal)sigmaByFeature[i] != 0) {
                         intensityDB[record[c]][i] = ((decimal)intensityDB[record[c]][i] - meanByFeature[i]) / sigmaByFeature[i];
+
+                        //if (Math.Abs((decimal)intensityDB[record[c]][i]) > 3.5M) {
+                        //    Console.WriteLine(record[c] + " is " + intensityDB[record[c]][i] + " stdev from the mean in intensity bin " + i);
+                        //}
 
                         //I feel like this actually improves the search results, but it also deviates from the example docs
                         //so leave it commented for now
@@ -200,6 +207,10 @@ namespace CBIR {
                     if (colorCodeDB[record[c]].Count > 1 && (decimal)sigmaByFeature[i] != 0) {
                         colorCodeDB[record[c]][i - intensity] = ((decimal)colorCodeDB[record[c]][i - intensity] - meanByFeature[i]) / sigmaByFeature[i];
 
+                        //if (Math.Abs((decimal)colorCodeDB[record[c]][i - intensity]) > 3.5M) {
+                        //    Console.WriteLine(record[c] + " is " + colorCodeDB[record[c]][i - intensity] + " stdev from the mean in color code bin " + i);
+                        //}
+
                         //put a cap on the intensity of outliers so that sigma cutoffs can be more consistent during weight adjustment
                         //if ((decimal)colorCodeDB[record[c]][i - intensity] > outlierCutoff) { colorCodeDB[record[c]][i - intensity] = outlierCutoff; }
                         //if ((decimal)colorCodeDB[record[c]][i - intensity] < -outlierCutoff) { colorCodeDB[record[c]][i - intensity] = -outlierCutoff; }
@@ -211,13 +222,51 @@ namespace CBIR {
                     if (textureDB[record[c]].Count > 1 && (decimal)sigmaByFeature[i] != 0) {
                         textureDB[record[c]][i - colorcode] = ((decimal)textureDB[record[c]][i - colorcode] - meanByFeature[i]) / sigmaByFeature[i];
 
+                        //if (Math.Abs((decimal)textureDB[record[c]][i - colorcode]) > 3.5M) {
+                        //    Console.WriteLine(record[c] + " is " + textureDB[record[c]][i - colorcode] + " stdev from the mean in texture bin " + i);
+                        //}
+
                         //put a cap on the intensity of outliers so that sigma cutoffs can be more consistent during weight adjustment
                         //if ((decimal)textureDB[record[c]][i - colorcode] > outlierCutoff) { textureDB[record[c]][i - colorcode] = outlierCutoff; }
                         //if ((decimal)textureDB[record[c]][i - colorcode] < -outlierCutoff) { textureDB[record[c]][i - colorcode] = -outlierCutoff; }
                     }
                 }
             }
-            normalized = true;
+            normalizedGuassian = true;
+        }
+
+        //use [0..1] normalization
+        public void NormalizeByFeaturesZeroToOne() {
+            if (normalizedZeroToOne) { return; } //don't let the db get normalized more than once
+            ComputeMaxMinByFeature();
+            List<string> record = intensityDB.Keys.ToList<string>();
+            for (int c = 0; c < record.Count; c++) {
+                int intensity = intensityDB[record[c]].Count;
+                int colorcode = colorCodeDB[record[c]].Count + intensity;
+                int texture = textureDB[record[c]].Count + colorcode;
+
+                //normalize intensityDB
+                for (int i = 0; i < intensity; i++) {
+                    if ((maxByFeature[i] - minByFeature[i]) != 0) {
+                        intensityDB[record[c]][i] = ((decimal)intensityDB[record[c]][i] - minByFeature[i]) / (maxByFeature[i] - minByFeature[i]);
+                    }
+                }
+
+                //normalize colorCodeDB
+                for (int i = intensity; i < colorcode; i++) {
+                    if ((maxByFeature[i] - minByFeature[i]) != 0) {
+                        colorCodeDB[record[c]][i - intensity] = ((decimal)colorCodeDB[record[c]][i - intensity] - minByFeature[i]) / (maxByFeature[i] - minByFeature[i]);
+                    }
+                }
+
+                //normalize textureDB
+                for (int i = colorcode; i < texture; i++) {
+                    if ((maxByFeature[i] - minByFeature[i]) != 0) {
+                        textureDB[record[c]][i - colorcode] = ((decimal)textureDB[record[c]][i - colorcode] - minByFeature[i]) / (maxByFeature[i] - minByFeature[i]);
+                    }
+                }
+            }
+            normalizedZeroToOne = true;
         }
 
         public ArrayList[] GenerateFeatureMatrix() {
@@ -250,6 +299,18 @@ namespace CBIR {
             return feature;
         }
 
+        public void ComputeMaxMinByFeature() {
+            ArrayList[] feature = GenerateFeatureMatrix();
+
+            //find the mean and standard deviation by looking at each feature or bin individually over all pictures in the DB
+            for (int c = 0; c < feature.Length; c++) {
+                decimal max = ((ArrayList)feature[c]).OfType<decimal>().Max(); //find the max
+                decimal min = ((ArrayList)feature[c]).OfType<decimal>().Min(); //find the max
+                this.maxByFeature.Add(max);
+                this.minByFeature.Add(min);
+            }
+        }
+
         public void ComputeStdDevByFeature() {
             ArrayList[] feature = GenerateFeatureMatrix();
 
@@ -277,7 +338,7 @@ namespace CBIR {
         }
 
         public void Add(string filename, long size, ArrayList intensityHist, ArrayList colorCodeHist, ArrayList textureHist) {
-            if (normalized) { throw new Exception("Can't add items to a normalized DB. Reload or remake the DB before adding this item"); }
+            if (normalizedGuassian) { throw new Exception("Can't add items to a normalized DB. Reload or remake the DB before adding this item"); }
             sizeDB.Add(filename, size);
             intensityDB.Add(filename, intensityHist);
             colorCodeDB.Add(filename, colorCodeHist);
