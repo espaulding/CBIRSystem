@@ -61,13 +61,14 @@
             this.pbQueryPicture = new System.Windows.Forms.PictureBox();
             this.gbQueryImage = new System.Windows.Forms.GroupBox();
             this.btnSearch = new System.Windows.Forms.Button();
-            this.btnClose = new System.Windows.Forms.Button();
             this.gbDistance = new System.Windows.Forms.GroupBox();
             this.rbEuclidean = new System.Windows.Forms.RadioButton();
             this.rbManhattan = new System.Windows.Forms.RadioButton();
             this.gbGallery = new System.Windows.Forms.GroupBox();
             this.gbOptions = new System.Windows.Forms.GroupBox();
             this.cbRelevanceFeedback = new System.Windows.Forms.CheckBox();
+            this.cbGaussian = new System.Windows.Forms.CheckBox();
+            this.cbUniform = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox01)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox02)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox03)).BeginInit();
@@ -98,9 +99,9 @@
             // 
             // btnPrevious
             // 
-            this.btnPrevious.Location = new System.Drawing.Point(464, 142);
+            this.btnPrevious.Location = new System.Drawing.Point(289, 113);
             this.btnPrevious.Name = "btnPrevious";
-            this.btnPrevious.Size = new System.Drawing.Size(60, 36);
+            this.btnPrevious.Size = new System.Drawing.Size(80, 36);
             this.btnPrevious.TabIndex = 20;
             this.btnPrevious.Text = "Previous";
             this.btnPrevious.UseVisualStyleBackColor = true;
@@ -108,9 +109,9 @@
             // 
             // btnNext
             // 
-            this.btnNext.Location = new System.Drawing.Point(618, 142);
+            this.btnNext.Location = new System.Drawing.Point(379, 113);
             this.btnNext.Name = "btnNext";
-            this.btnNext.Size = new System.Drawing.Size(75, 35);
+            this.btnNext.Size = new System.Drawing.Size(80, 36);
             this.btnNext.TabIndex = 15;
             this.btnNext.Text = "Next";
             this.btnNext.UseVisualStyleBackColor = true;
@@ -119,7 +120,7 @@
             // pageLabel
             // 
             this.pageLabel.AutoSize = true;
-            this.pageLabel.Location = new System.Drawing.Point(525, 154);
+            this.pageLabel.Location = new System.Drawing.Point(330, 164);
             this.pageLabel.Name = "pageLabel";
             this.pageLabel.Size = new System.Drawing.Size(87, 13);
             this.pageLabel.TabIndex = 15;
@@ -458,7 +459,7 @@
             // 
             // btnChangeQuery
             // 
-            this.btnChangeQuery.Location = new System.Drawing.Point(288, 29);
+            this.btnChangeQuery.Location = new System.Drawing.Point(289, 21);
             this.btnChangeQuery.Name = "btnChangeQuery";
             this.btnChangeQuery.Size = new System.Drawing.Size(170, 36);
             this.btnChangeQuery.TabIndex = 24;
@@ -486,23 +487,13 @@
             // 
             // btnSearch
             // 
-            this.btnSearch.Location = new System.Drawing.Point(288, 71);
+            this.btnSearch.Location = new System.Drawing.Point(289, 63);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(171, 65);
+            this.btnSearch.Size = new System.Drawing.Size(170, 44);
             this.btnSearch.TabIndex = 27;
             this.btnSearch.Text = "Search";
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
-            // 
-            // btnClose
-            // 
-            this.btnClose.Location = new System.Drawing.Point(288, 142);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(171, 36);
-            this.btnClose.TabIndex = 28;
-            this.btnClose.Text = "Close";
-            this.btnClose.UseVisualStyleBackColor = true;
-            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // gbDistance
             // 
@@ -510,7 +501,7 @@
             this.gbDistance.Controls.Add(this.rbManhattan);
             this.gbDistance.Location = new System.Drawing.Point(464, 12);
             this.gbDistance.Name = "gbDistance";
-            this.gbDistance.Size = new System.Drawing.Size(229, 76);
+            this.gbDistance.Size = new System.Drawing.Size(229, 57);
             this.gbDistance.TabIndex = 29;
             this.gbDistance.TabStop = false;
             this.gbDistance.Text = "Distance Methods";
@@ -518,7 +509,7 @@
             // rbEuclidean
             // 
             this.rbEuclidean.AutoSize = true;
-            this.rbEuclidean.Location = new System.Drawing.Point(39, 48);
+            this.rbEuclidean.Location = new System.Drawing.Point(39, 37);
             this.rbEuclidean.Name = "rbEuclidean";
             this.rbEuclidean.Size = new System.Drawing.Size(117, 17);
             this.rbEuclidean.TabIndex = 1;
@@ -531,7 +522,7 @@
             // 
             this.rbManhattan.AutoSize = true;
             this.rbManhattan.Checked = true;
-            this.rbManhattan.Location = new System.Drawing.Point(39, 22);
+            this.rbManhattan.Location = new System.Drawing.Point(39, 17);
             this.rbManhattan.Name = "rbManhattan";
             this.rbManhattan.Size = new System.Drawing.Size(121, 17);
             this.rbManhattan.TabIndex = 0;
@@ -571,10 +562,12 @@
             // 
             // gbOptions
             // 
+            this.gbOptions.Controls.Add(this.cbUniform);
+            this.gbOptions.Controls.Add(this.cbGaussian);
             this.gbOptions.Controls.Add(this.cbRelevanceFeedback);
-            this.gbOptions.Location = new System.Drawing.Point(464, 95);
+            this.gbOptions.Location = new System.Drawing.Point(464, 75);
             this.gbOptions.Name = "gbOptions";
-            this.gbOptions.Size = new System.Drawing.Size(229, 36);
+            this.gbOptions.Size = new System.Drawing.Size(229, 102);
             this.gbOptions.TabIndex = 31;
             this.gbOptions.TabStop = false;
             this.gbOptions.Text = "Options";
@@ -584,13 +577,37 @@
             this.cbRelevanceFeedback.AutoSize = true;
             this.cbRelevanceFeedback.Checked = true;
             this.cbRelevanceFeedback.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbRelevanceFeedback.Location = new System.Drawing.Point(39, 13);
+            this.cbRelevanceFeedback.Location = new System.Drawing.Point(39, 15);
             this.cbRelevanceFeedback.Name = "cbRelevanceFeedback";
             this.cbRelevanceFeedback.Size = new System.Drawing.Size(151, 17);
             this.cbRelevanceFeedback.TabIndex = 0;
             this.cbRelevanceFeedback.Text = "Use Relevance Feedback";
             this.cbRelevanceFeedback.UseVisualStyleBackColor = true;
             this.cbRelevanceFeedback.CheckedChanged += new System.EventHandler(this.cbRelevanceFeedback_CheckedChanged);
+            // 
+            // cbGaussian
+            // 
+            this.cbGaussian.AutoSize = true;
+            this.cbGaussian.Checked = true;
+            this.cbGaussian.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbGaussian.Location = new System.Drawing.Point(39, 43);
+            this.cbGaussian.Name = "cbGaussian";
+            this.cbGaussian.Size = new System.Drawing.Size(158, 17);
+            this.cbGaussian.TabIndex = 1;
+            this.cbGaussian.Text = "Use Gaussian Normalization";
+            this.cbGaussian.UseVisualStyleBackColor = true;
+            // 
+            // cbUniform
+            // 
+            this.cbUniform.AutoSize = true;
+            this.cbUniform.Checked = true;
+            this.cbUniform.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbUniform.Location = new System.Drawing.Point(39, 71);
+            this.cbUniform.Name = "cbUniform";
+            this.cbUniform.Size = new System.Drawing.Size(150, 17);
+            this.cbUniform.TabIndex = 2;
+            this.cbUniform.Text = "Use Uniform Normalization";
+            this.cbUniform.UseVisualStyleBackColor = true;
             // 
             // ResultofSearch
             // 
@@ -602,7 +619,6 @@
             this.Controls.Add(this.gbOptions);
             this.Controls.Add(this.gbGallery);
             this.Controls.Add(this.gbDistance);
-            this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.gbQueryImage);
             this.Controls.Add(this.gbFeatures);
@@ -678,7 +694,6 @@
         private System.Windows.Forms.PictureBox pbQueryPicture;
         private System.Windows.Forms.GroupBox gbQueryImage;
         private System.Windows.Forms.Button btnSearch;
-        private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.GroupBox gbDistance;
         private System.Windows.Forms.RadioButton rbEuclidean;
         private System.Windows.Forms.RadioButton rbManhattan;
@@ -690,5 +705,7 @@
         private System.Windows.Forms.CheckBox cbIntensity;
         private System.Windows.Forms.GroupBox gbOptions;
         private System.Windows.Forms.CheckBox cbRelevanceFeedback;
+        private System.Windows.Forms.CheckBox cbUniform;
+        private System.Windows.Forms.CheckBox cbGaussian;
     }
 }

@@ -12,11 +12,16 @@ namespace CBIR {
         //and then calculats the distance that each picture is from the query image
         //this is the big cheese right here
         //the whole point of CBIR is to call this function get the query results by updating the distances in the list objects
-        static public void RankPictures(FeaturesDB db, string qFilename, int distanceFunc, bool[] features, List<ImageMetaData> list, bool feedback) {
-            db.SynchDB(list);
+        static public void RankPictures(DirectoryInfo folder, string dbfile, string qFilename, int distanceFunc, bool[] features, bool[] options, ref List<ImageMetaData> list) {
+            bool relevanceFeedback = options[0];
+            bool gaussianNormalization = options[1];
+            bool uniformNormalization = options[2];
+            bool forceRebuild = false; //true will cause LoadDB to recompute all features rather than loading from file
+
+            FeaturesDB db = FeaturesDB.LoadDB(folder, dbfile, ref list, gaussianNormalization, uniformNormalization, forceRebuild);
             List<decimal> weight = GetInitialWeights(features); //get unbiased weights
             GetPictureByName(list, qFilename).relevant = true; //the query image is always relevant
-            if (feedback) { AdjustWeights(db, weight, features, list); } //bias weights with selected features of relevant images
+            if (relevanceFeedback) { AdjustWeights(db, weight, features, list); } //bias weights with selected features of relevant images
 
             //update picture distances
             ArrayList qFeatures = db.SelectFeatures(qFilename, features);

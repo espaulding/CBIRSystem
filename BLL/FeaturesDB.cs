@@ -74,7 +74,7 @@ namespace CBIR {
 
         //undo any DB modifications caused by relevance feedback by either reloading the DB from a file
         //or if necessary rebuild it from scratch, computing all the feature metadata again
-        static public FeaturesDB LoadDB(DirectoryInfo folder, string filename, ref List<ImageMetaData> oldlist, bool forceRebuild) {
+        static public FeaturesDB LoadDB(DirectoryInfo folder, string filename, ref List<ImageMetaData> oldlist, bool gaussian, bool uniform, bool forceRebuild) {
             string dbfile = folder.FullName + "\\" + filename;
 
             //if there is no oldlist start making a new one, but otherwise alias the old list as the new list
@@ -83,13 +83,12 @@ namespace CBIR {
 
             FeaturesDB db = new FeaturesDB(folder,filename);
             if (forceRebuild) { db.RebuildDB(); }
-            db = db.SynchDB(list);
-
+            db = SynchDB(db, list, gaussian, uniform);
             return db;
         }
 
         //add new items to the database as needed, and synch the db up with list of picture metadata
-        public FeaturesDB SynchDB(List<ImageMetaData> list) {
+        static private FeaturesDB SynchDB(FeaturesDB db, List<ImageMetaData> list, bool gaussian, bool uniform) {
             //possible scenarios
             //-different file, but named the same as an old file is in the folder; ACTION: the old file is removed from the db and list, new file gets added
             //-a file was added to the folder; ACTION: new file gets added to the db and the list
@@ -99,12 +98,12 @@ namespace CBIR {
             List<ImageMetaData> added = new List<ImageMetaData>();
 
             //anything new in the folder should be added to the list and the db
-            foreach (var file in folder.GetFiles("*.jpg")) {
-                if (sizeDB.ContainsKey(file.Name) && !(sizeDB[file.Name] == file.Length)) {
-                    Remove(file.Name); //the file changed size so delete it from our DB 
+            foreach (var file in db.folder.GetFiles("*.jpg")) {
+                if (db.sizeDB.ContainsKey(file.Name) && !(db.sizeDB[file.Name] == file.Length)) {
+                    db.Remove(file.Name); //the file changed size so delete it from our DB 
                 }
 
-                if (!sizeDB.ContainsKey(file.Name)) {
+                if (!db.sizeDB.ContainsKey(file.Name)) {
                     updated = true;
                     added.Add(new ImageMetaData(file.Name, file.FullName, file.Length, false, 0));
                 }
@@ -112,9 +111,9 @@ namespace CBIR {
 
             //anything in the db but missing from list needs to be added to list
             //critical if the db is loaded for the first time(application start) because the list will be empty
-            foreach (string pic in sizeDB.Keys) {
+            foreach (string pic in db.sizeDB.Keys) {
                 if (CBIRfunctions.GetPictureByName(list, pic) == null) {
-                    string fullpath = folder.ToString() + "\\" + pic;
+                    string fullpath = db.folder.ToString() + "\\" + pic;
                     if (File.Exists(fullpath)) {
                         FileInfo f = new FileInfo(fullpath);
                         ImageMetaData p = new ImageMetaData(f.Name, f.FullName, f.Length, false, 0);
@@ -128,30 +127,26 @@ namespace CBIR {
 
             //anything in the removed list will be taken out of list and the db
             foreach (string pic in removed) {
-                Remove(pic);
+                db.Remove(pic);
                 list.Remove(CBIRfunctions.GetPictureByName(list, pic));
             }
 
-            FeaturesDB db = this;
             //add new stuff in the folder to the db
             if (added.Count > 0) {
                 //reload the db file before adding new stuff because we need the un-normalized db 
                 //so that everything in the db can be normalized together          
-                if (normalizedGuassian) { db = new FeaturesDB(folder, dbname); }
+                if (db.normalizedGuassian || db.normalizedZeroToOne) { db = new FeaturesDB(db.folder, db.dbname); }
                 foreach (ImageMetaData pic in added) {
                     list.Remove(CBIRfunctions.GetPictureByName(list, pic.name));
                     list.Add(pic);
-                    AddImage(pic.path, pic.name, pic.size, DR, DC);
+                    db.AddImage(pic.path, pic.name, pic.size, DR, DC);
                 }
             }
 
             //save changes to the dbFile
-            if (updated) {
-                HF.Serialize(db.dbfullname, db); //always save changes before normalization              
-            }
-            NormalizeByFeatures(); //normalize each feature over a gaussian distribution
-            //NormalizeByFeaturesZeroToOne(); //normalize each feature to the range [0..1] so such that the feature sums to 1
-                                              //Zero to One normalization by far does not Match Min's results
+            if (updated) { HF.Serialize(db.dbfullname, db); }   //always save changes before normalization   
+            if (gaussian) { db.NormalizeByFeaturesGaussian(); }         //normalize each feature over a gaussian distribution
+            if (uniform) { db.NormalizeByFeaturesZeroToOne(); } //normalize each feature to the range [0..1] so such that the feature sums to 1    
             return db;
         }
 
@@ -172,7 +167,7 @@ namespace CBIR {
 
         //use gaussian normalization
         //this method gets good results, but still isn't matching up with Min's sample output
-        public void NormalizeByFeatures() {
+        public void NormalizeByFeaturesGaussian() {
             if (normalizedGuassian) { return; } //don't let the db get normalized more than once
             ComputeStdDevByFeature();
             List<string> record = sizeDB.Keys.ToList<string>();
@@ -181,7 +176,7 @@ namespace CBIR {
                 int colorcode = COLOR_CODE_BIN_COUNT + intensity;
                 int texture = TEXTURE_BIN_COUNT + colorcode;
                 //decimal outlierCutoff = 4.5; //anything greater than 3 stdev from the mean is 1% of a gaussian distribution
-                                            //however many features are falling 5 and 6 stdev which is a clear demonstration of how
+                                            //however many features are falling 5 to 9 stdev which is a clear demonstration of how
                                             //poorly the gaussian distribution actually approximates these features
 
                 //normalize intensityDB
@@ -237,7 +232,7 @@ namespace CBIR {
 
         //use [0..1] normalization
         public void NormalizeByFeaturesZeroToOne() {
-            if (normalizedZeroToOne) { return; } //don't let the db get normalized more than once
+            if (normalizedZeroToOne) { return; } //don't let the db get uniform normalized more than once
             ComputeMaxMinByFeature();
             List<string> record = intensityDB.Keys.ToList<string>();
             for (int c = 0; c < record.Count; c++) {
@@ -338,7 +333,7 @@ namespace CBIR {
         }
 
         public void Add(string filename, long size, ArrayList intensityHist, ArrayList colorCodeHist, ArrayList textureHist) {
-            if (normalizedGuassian) { throw new Exception("Can't add items to a normalized DB. Reload or remake the DB before adding this item"); }
+            if (normalizedGuassian || normalizedZeroToOne) { throw new Exception("Can't add items to a normalized DB. Reload or remake the DB before adding this item"); }
             sizeDB.Add(filename, size);
             intensityDB.Add(filename, intensityHist);
             colorCodeDB.Add(filename, colorCodeHist);

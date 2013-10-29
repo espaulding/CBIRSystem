@@ -14,7 +14,6 @@ namespace CBIR {
         public const int BOX_HEIGHT = 110;
 
         List<ImageMetaData> list; //list of ImageMetaData objects
-        FeaturesDB db; //the database of image feature data
         frmSearch originalForm;
         private int page, totalPages, distanceFunc = 1;
         private string queryPic;
@@ -32,7 +31,7 @@ namespace CBIR {
             get {
                 bool[][] state = new bool[][] { 
                                   new bool[] { rbManhattan.Checked, rbEuclidean.Checked },
-                                  new bool[] { cbRelevanceFeedback.Checked },
+                                  new bool[] { cbRelevanceFeedback.Checked, cbGaussian.Checked, cbUniform.Checked },
                                   new bool[] { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked}
                                  };
                 return state;
@@ -41,6 +40,8 @@ namespace CBIR {
                 rbManhattan.Checked         = value[0][0];
                 rbEuclidean.Checked         = value[0][1];
                 cbRelevanceFeedback.Checked = value[1][0];
+                cbGaussian.Checked          = value[1][1];
+                cbUniform.Checked           = value[1][2];
                 cbIntensity.Checked         = value[2][0];
                 cbColorCode.Checked         = value[2][1];
                 cbTextureEnergy.Checked     = value[2][2];
@@ -61,7 +62,6 @@ namespace CBIR {
             pbQueryPicture.Image = HF.ScaleImage(Bitmap.FromFile(imageFolder.FullName + "\\" + queryPicture),
                                                  pbQueryPicture.Width, pbQueryPicture.Height, "noscale");
 
-            InitNewSearch();
             btnSearch_Click(new object(), new EventArgs());
         }
 
@@ -82,18 +82,14 @@ namespace CBIR {
         private void btnSearch_Click(object sender, EventArgs e) {
             page = 0;
             bool[] features = { cbIntensity.Checked, cbColorCode.Checked, cbTextureEnergy.Checked, cbTextureEntropy.Checked, cbTextureContrast.Checked };
-            CBIRfunctions.RankPictures(db, queryPic, distanceFunc, features, list, cbRelevanceFeedback.Checked);
+            bool[] options = { cbRelevanceFeedback.Checked, cbGaussian.Checked, cbUniform.Checked };
+            CBIRfunctions.RankPictures(imageFolder, HISTOGRAM_FILE, queryPic, distanceFunc, features, options, ref list);
 
             //re-sort the list of images by the distances found during ranking
             List<ImageMetaData> sorted = list.OfType<ImageMetaData>().OrderBy(pic => pic.distance).ToList<ImageMetaData>();
             for (int x = 0; x < list.Count; x++) { list[x] = sorted[x]; }
 
             DisplayImageResults();
-        }
-
-        //close the form. i.e. quit the appliation
-        private void btnClose_Click(object sender, EventArgs e) {
-            this.Close();
         }
 
         //reset window is next button is clicked
@@ -240,15 +236,6 @@ namespace CBIR {
             }
         }
 
-        //toggle a picture as relevant or not relevant
-        private void cbRelevant_CheckedChanged(object sender, EventArgs e) {
-            CheckBox pic = (CheckBox)sender;
-            int number = -1;
-            Int32.TryParse(pic.Name.Substring(10, 2), out number);
-            int gNumber = --number + IMAGES_PER_PAGE * page;
-            ToggleRelevant(number, gNumber, pic.Checked);
-        }
-
         //toggle a picturebox/picture as relevant or not
         private void ToggleRelevant(int number, int gNumber, bool relevant) {
             if (cbRelevanceFeedback.Checked) {
@@ -276,9 +263,6 @@ namespace CBIR {
         //mark every picture as not relevant and reset weights on all features
         private void InitNewSearch() {
             if (imageFolder != null) {
-                bool forceRebuild = false; //true will cause LoadDB to recompute all features rather than loading from file
-
-                db = FeaturesDB.LoadDB(imageFolder, HISTOGRAM_FILE, ref list, forceRebuild);
                 if (list != null) {
                     //wipe out any old information concerning whether a picture is relevant or not
                     for (int c = 0; c < list.Count; c++) {
