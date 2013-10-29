@@ -153,6 +153,9 @@ namespace CBIR {
         //turn relevance feedback on and off
         private void cbRelevanceFeedback_CheckedChanged(object sender, EventArgs e) {
             InitNewSearch();
+            if (cbRelevanceFeedback.Checked) {
+                MessageBox.Show("Left click the images to toggle relevance. Green bordered images are relevant and Red bordered images are not relevant.");
+            }
         }
 
         #endregion
