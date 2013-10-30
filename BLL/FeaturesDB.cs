@@ -146,7 +146,7 @@ namespace CBIR {
             //save changes to the dbFile
             if (updated) { HF.Serialize(db.dbfullname, db); }   //always save changes before normalization   
             if (gaussian) { db.NormalizeByFeaturesGaussian(); }         //normalize each feature over a gaussian distribution
-            if (uniform) { db.NormalizeByFeaturesZeroToOne(); } //normalize each feature to the range [0..1] so such that the feature sums to 1    
+            if (uniform) { db.NormalizeByFeaturesUniformly(); } //normalize each feature to the range [0..1] so such that the feature sums to 1    
             return db;
         }
 
@@ -169,61 +169,53 @@ namespace CBIR {
         //this method gets good results, but still isn't matching up with Min's sample output
         public void NormalizeByFeaturesGaussian() {
             if (normalizedGuassian) { return; } //don't let the db get normalized more than once
+            bool verbose = false; //cause console output to report significant outliers among the features
             ComputeStdDevByFeature();
             List<string> record = sizeDB.Keys.ToList<string>();
             for (int c = 0; c < record.Count; c++) {
                 int intensity = INTENSITY_BIN_COUNT;
                 int colorcode = COLOR_CODE_BIN_COUNT + intensity;
                 int texture = TEXTURE_BIN_COUNT + colorcode;
-                //decimal outlierCutoff = 4.5; //anything greater than 3 stdev from the mean is 1% of a gaussian distribution
-                                            //however many features are falling 5 to 9 stdev which is a clear demonstration of how
-                                            //poorly the gaussian distribution actually approximates these features
 
                 //normalize intensityDB
                 for (int i = 0; i < intensity; i++) {
-                    if (intensityDB[record[c]].Count > 1 && (decimal)sigmaByFeature[i] != 0) {
+                    if (intensityDB[record[c]].Count > 1 && (decimal)HF.FixFloatingPoint(sigmaByFeature[i], "1.0E-10") != 0) {
                         intensityDB[record[c]][i] = ((decimal)intensityDB[record[c]][i] - meanByFeature[i]) / sigmaByFeature[i];
 
-                        //if (Math.Abs((decimal)intensityDB[record[c]][i]) > 3.5M) {
-                        //    Console.WriteLine(record[c] + " is " + intensityDB[record[c]][i] + " stdev from the mean in intensity bin " + i);
-                        //}
-
-                        //I feel like this actually improves the search results, but it also deviates from the example docs
-                        //so leave it commented for now
-
-                        //put a cap on the intensity of outliers so that sigma cutoffs can be more consistent during weight adjustment
-                        //if ((decimal)intensityDB[record[c]][i] > outlierCutoff) { intensityDB[record[c]][i] = outlierCutoff; }
-                        //if ((decimal)intensityDB[record[c]][i] < -outlierCutoff) { intensityDB[record[c]][i] = -outlierCutoff; }
+                        if (Math.Abs((decimal)intensityDB[record[c]][i]) > 4M && verbose) {
+                            Console.WriteLine(record[c] + " is " + intensityDB[record[c]][i] + " stdev from the mean in intensity bin " + i);
+                        }
+                    } else {
+                        //this feature currently contains no information that can be used, so suppress it
+                        intensityDB[record[c]][i] = 0M; 
                     }
                 }
 
                 //normalize colorCodeDB
                 for (int i = intensity; i < colorcode; i++) {
-                    if (colorCodeDB[record[c]].Count > 1 && (decimal)sigmaByFeature[i] != 0) {
+                    if (colorCodeDB[record[c]].Count > 1 && (decimal)HF.FixFloatingPoint(sigmaByFeature[i], "1.0E-10") != 0) {
                         colorCodeDB[record[c]][i - intensity] = ((decimal)colorCodeDB[record[c]][i - intensity] - meanByFeature[i]) / sigmaByFeature[i];
 
-                        //if (Math.Abs((decimal)colorCodeDB[record[c]][i - intensity]) > 3.5M) {
-                        //    Console.WriteLine(record[c] + " is " + colorCodeDB[record[c]][i - intensity] + " stdev from the mean in color code bin " + i);
-                        //}
-
-                        //put a cap on the intensity of outliers so that sigma cutoffs can be more consistent during weight adjustment
-                        //if ((decimal)colorCodeDB[record[c]][i - intensity] > outlierCutoff) { colorCodeDB[record[c]][i - intensity] = outlierCutoff; }
-                        //if ((decimal)colorCodeDB[record[c]][i - intensity] < -outlierCutoff) { colorCodeDB[record[c]][i - intensity] = -outlierCutoff; }
+                        if (Math.Abs((decimal)colorCodeDB[record[c]][i - intensity]) > 4M && verbose) {
+                            Console.WriteLine(record[c] + " is " + colorCodeDB[record[c]][i - intensity] + " stdev from the mean in color code bin " + i);
+                        }
+                    } else {
+                        //this feature currently contains no information that can be used, so suppress it
+                        colorCodeDB[record[c]][i - intensity] = 0M;
                     }
                 }
 
                 //normalize textureDB
                 for (int i = colorcode; i < texture; i++) {
-                    if (textureDB[record[c]].Count > 1 && (decimal)sigmaByFeature[i] != 0) {
+                    if (textureDB[record[c]].Count > 1 && (decimal)HF.FixFloatingPoint(sigmaByFeature[i], "1.0E-10") != 0) {
                         textureDB[record[c]][i - colorcode] = ((decimal)textureDB[record[c]][i - colorcode] - meanByFeature[i]) / sigmaByFeature[i];
 
-                        //if (Math.Abs((decimal)textureDB[record[c]][i - colorcode]) > 3.5M) {
-                        //    Console.WriteLine(record[c] + " is " + textureDB[record[c]][i - colorcode] + " stdev from the mean in texture bin " + i);
-                        //}
-
-                        //put a cap on the intensity of outliers so that sigma cutoffs can be more consistent during weight adjustment
-                        //if ((decimal)textureDB[record[c]][i - colorcode] > outlierCutoff) { textureDB[record[c]][i - colorcode] = outlierCutoff; }
-                        //if ((decimal)textureDB[record[c]][i - colorcode] < -outlierCutoff) { textureDB[record[c]][i - colorcode] = -outlierCutoff; }
+                        if (Math.Abs((decimal)textureDB[record[c]][i - colorcode]) > 4M && verbose) {
+                            Console.WriteLine(record[c] + " is " + textureDB[record[c]][i - colorcode] + " stdev from the mean in texture bin " + i);
+                        }
+                    } else {
+                        //this feature currently contains no information that can be used, so suppress it
+                        textureDB[record[c]][i - colorcode] = 0M;
                     }
                 }
             }
@@ -231,9 +223,10 @@ namespace CBIR {
         }
 
         //use [0..1] normalization
-        public void NormalizeByFeaturesZeroToOne() {
+        public void NormalizeByFeaturesUniformly() {
             if (normalizedZeroToOne) { return; } //don't let the db get uniform normalized more than once
             ComputeMaxMinByFeature();
+            decimal tolerance = .00000001M; //the max and the min of a feature must be at least this different for the feature to have relevant information
             List<string> record = intensityDB.Keys.ToList<string>();
             for (int c = 0; c < record.Count; c++) {
                 int intensity = intensityDB[record[c]].Count;
@@ -242,22 +235,31 @@ namespace CBIR {
 
                 //normalize intensityDB
                 for (int i = 0; i < intensity; i++) {
-                    if ((maxByFeature[i] - minByFeature[i]) != 0) {
+                    if (Math.Abs(maxByFeature[i] - minByFeature[i]) > tolerance) {
                         intensityDB[record[c]][i] = ((decimal)intensityDB[record[c]][i] - minByFeature[i]) / (maxByFeature[i] - minByFeature[i]);
+                    } else {
+                        //this feature currently contains no information that can be used, so suppress it
+                        intensityDB[record[c]][i] = 0M;
                     }
                 }
 
                 //normalize colorCodeDB
                 for (int i = intensity; i < colorcode; i++) {
-                    if ((maxByFeature[i] - minByFeature[i]) != 0) {
+                    if (Math.Abs(maxByFeature[i] - minByFeature[i]) > tolerance) {
                         colorCodeDB[record[c]][i - intensity] = ((decimal)colorCodeDB[record[c]][i - intensity] - minByFeature[i]) / (maxByFeature[i] - minByFeature[i]);
+                    } else {
+                        //this feature currently contains no information that can be used, so suppress it
+                        colorCodeDB[record[c]][i - intensity] = 0M;
                     }
                 }
 
                 //normalize textureDB
                 for (int i = colorcode; i < texture; i++) {
-                    if ((maxByFeature[i] - minByFeature[i]) != 0) {
+                    if (Math.Abs(maxByFeature[i] - minByFeature[i]) > tolerance) {
                         textureDB[record[c]][i - colorcode] = ((decimal)textureDB[record[c]][i - colorcode] - minByFeature[i]) / (maxByFeature[i] - minByFeature[i]);
+                    } else {
+                        //this feature currently contains no information that can be used, so suppress it
+                        textureDB[record[c]][i - colorcode] = 0M;
                     }
                 }
             }

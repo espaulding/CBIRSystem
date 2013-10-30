@@ -66,9 +66,9 @@
             this.rbManhattan = new System.Windows.Forms.RadioButton();
             this.gbGallery = new System.Windows.Forms.GroupBox();
             this.gbOptions = new System.Windows.Forms.GroupBox();
-            this.cbRelevanceFeedback = new System.Windows.Forms.CheckBox();
-            this.cbGaussian = new System.Windows.Forms.CheckBox();
             this.cbUniform = new System.Windows.Forms.CheckBox();
+            this.cbGaussian = new System.Windows.Forms.CheckBox();
+            this.cbRelevanceFeedback = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox01)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox02)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox03)).BeginInit();
@@ -129,7 +129,7 @@
             // pictureBox01
             // 
             this.pictureBox01.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox01.BackColor = System.Drawing.Color.Red;
+            this.pictureBox01.BackColor = System.Drawing.Color.White;
             this.pictureBox01.Location = new System.Drawing.Point(11, 22);
             this.pictureBox01.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox01.Name = "pictureBox01";
@@ -142,7 +142,7 @@
             // pictureBox02
             // 
             this.pictureBox02.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox02.BackColor = System.Drawing.Color.Red;
+            this.pictureBox02.BackColor = System.Drawing.Color.White;
             this.pictureBox02.Location = new System.Drawing.Point(182, 22);
             this.pictureBox02.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox02.Name = "pictureBox02";
@@ -155,7 +155,7 @@
             // pictureBox03
             // 
             this.pictureBox03.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox03.BackColor = System.Drawing.Color.Red;
+            this.pictureBox03.BackColor = System.Drawing.Color.White;
             this.pictureBox03.Location = new System.Drawing.Point(353, 22);
             this.pictureBox03.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox03.Name = "pictureBox03";
@@ -168,7 +168,7 @@
             // pictureBox04
             // 
             this.pictureBox04.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox04.BackColor = System.Drawing.Color.Red;
+            this.pictureBox04.BackColor = System.Drawing.Color.White;
             this.pictureBox04.Location = new System.Drawing.Point(524, 22);
             this.pictureBox04.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox04.Name = "pictureBox04";
@@ -181,7 +181,7 @@
             // pictureBox05
             // 
             this.pictureBox05.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox05.BackColor = System.Drawing.Color.Red;
+            this.pictureBox05.BackColor = System.Drawing.Color.White;
             this.pictureBox05.Location = new System.Drawing.Point(695, 22);
             this.pictureBox05.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox05.Name = "pictureBox05";
@@ -194,7 +194,7 @@
             // pictureBox06
             // 
             this.pictureBox06.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox06.BackColor = System.Drawing.Color.Red;
+            this.pictureBox06.BackColor = System.Drawing.Color.White;
             this.pictureBox06.Location = new System.Drawing.Point(11, 153);
             this.pictureBox06.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox06.Name = "pictureBox06";
@@ -207,7 +207,7 @@
             // pictureBox07
             // 
             this.pictureBox07.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox07.BackColor = System.Drawing.Color.Red;
+            this.pictureBox07.BackColor = System.Drawing.Color.White;
             this.pictureBox07.Location = new System.Drawing.Point(182, 153);
             this.pictureBox07.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox07.Name = "pictureBox07";
@@ -220,7 +220,7 @@
             // pictureBox08
             // 
             this.pictureBox08.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox08.BackColor = System.Drawing.Color.Red;
+            this.pictureBox08.BackColor = System.Drawing.Color.White;
             this.pictureBox08.Location = new System.Drawing.Point(354, 153);
             this.pictureBox08.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox08.Name = "pictureBox08";
@@ -233,7 +233,7 @@
             // pictureBox09
             // 
             this.pictureBox09.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox09.BackColor = System.Drawing.Color.Red;
+            this.pictureBox09.BackColor = System.Drawing.Color.White;
             this.pictureBox09.Location = new System.Drawing.Point(524, 153);
             this.pictureBox09.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox09.Name = "pictureBox09";
@@ -246,7 +246,7 @@
             // pictureBox10
             // 
             this.pictureBox10.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox10.BackColor = System.Drawing.Color.Red;
+            this.pictureBox10.BackColor = System.Drawing.Color.White;
             this.pictureBox10.Location = new System.Drawing.Point(695, 153);
             this.pictureBox10.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox10.Name = "pictureBox10";
@@ -259,7 +259,7 @@
             // pictureBox11
             // 
             this.pictureBox11.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox11.BackColor = System.Drawing.Color.Red;
+            this.pictureBox11.BackColor = System.Drawing.Color.White;
             this.pictureBox11.Location = new System.Drawing.Point(11, 287);
             this.pictureBox11.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox11.Name = "pictureBox11";
@@ -272,7 +272,7 @@
             // pictureBox12
             // 
             this.pictureBox12.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox12.BackColor = System.Drawing.Color.Red;
+            this.pictureBox12.BackColor = System.Drawing.Color.White;
             this.pictureBox12.Location = new System.Drawing.Point(182, 287);
             this.pictureBox12.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox12.Name = "pictureBox12";
@@ -285,7 +285,7 @@
             // pictureBox13
             // 
             this.pictureBox13.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox13.BackColor = System.Drawing.Color.Red;
+            this.pictureBox13.BackColor = System.Drawing.Color.White;
             this.pictureBox13.Location = new System.Drawing.Point(354, 287);
             this.pictureBox13.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox13.Name = "pictureBox13";
@@ -298,7 +298,7 @@
             // pictureBox14
             // 
             this.pictureBox14.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox14.BackColor = System.Drawing.Color.Red;
+            this.pictureBox14.BackColor = System.Drawing.Color.White;
             this.pictureBox14.Location = new System.Drawing.Point(524, 287);
             this.pictureBox14.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox14.Name = "pictureBox14";
@@ -311,7 +311,7 @@
             // pictureBox15
             // 
             this.pictureBox15.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox15.BackColor = System.Drawing.Color.Red;
+            this.pictureBox15.BackColor = System.Drawing.Color.White;
             this.pictureBox15.Location = new System.Drawing.Point(695, 287);
             this.pictureBox15.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox15.Name = "pictureBox15";
@@ -324,7 +324,7 @@
             // pictureBox16
             // 
             this.pictureBox16.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox16.BackColor = System.Drawing.Color.Red;
+            this.pictureBox16.BackColor = System.Drawing.Color.White;
             this.pictureBox16.Location = new System.Drawing.Point(11, 418);
             this.pictureBox16.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox16.Name = "pictureBox16";
@@ -337,7 +337,7 @@
             // pictureBox17
             // 
             this.pictureBox17.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox17.BackColor = System.Drawing.Color.Red;
+            this.pictureBox17.BackColor = System.Drawing.Color.White;
             this.pictureBox17.Location = new System.Drawing.Point(182, 418);
             this.pictureBox17.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox17.Name = "pictureBox17";
@@ -350,7 +350,7 @@
             // pictureBox18
             // 
             this.pictureBox18.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox18.BackColor = System.Drawing.Color.Red;
+            this.pictureBox18.BackColor = System.Drawing.Color.White;
             this.pictureBox18.Location = new System.Drawing.Point(354, 418);
             this.pictureBox18.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox18.Name = "pictureBox18";
@@ -363,7 +363,7 @@
             // pictureBox19
             // 
             this.pictureBox19.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox19.BackColor = System.Drawing.Color.Red;
+            this.pictureBox19.BackColor = System.Drawing.Color.White;
             this.pictureBox19.Location = new System.Drawing.Point(524, 418);
             this.pictureBox19.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox19.Name = "pictureBox19";
@@ -376,7 +376,7 @@
             // pictureBox20
             // 
             this.pictureBox20.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pictureBox20.BackColor = System.Drawing.Color.Red;
+            this.pictureBox20.BackColor = System.Drawing.Color.White;
             this.pictureBox20.Location = new System.Drawing.Point(695, 418);
             this.pictureBox20.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox20.Name = "pictureBox20";
@@ -572,18 +572,17 @@
             this.gbOptions.TabStop = false;
             this.gbOptions.Text = "Options";
             // 
-            // cbRelevanceFeedback
+            // cbUniform
             // 
-            this.cbRelevanceFeedback.AutoSize = true;
-            this.cbRelevanceFeedback.Checked = true;
-            this.cbRelevanceFeedback.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbRelevanceFeedback.Location = new System.Drawing.Point(39, 15);
-            this.cbRelevanceFeedback.Name = "cbRelevanceFeedback";
-            this.cbRelevanceFeedback.Size = new System.Drawing.Size(151, 17);
-            this.cbRelevanceFeedback.TabIndex = 0;
-            this.cbRelevanceFeedback.Text = "Use Relevance Feedback";
-            this.cbRelevanceFeedback.UseVisualStyleBackColor = true;
-            this.cbRelevanceFeedback.CheckedChanged += new System.EventHandler(this.cbRelevanceFeedback_CheckedChanged);
+            this.cbUniform.AutoSize = true;
+            this.cbUniform.Checked = true;
+            this.cbUniform.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbUniform.Location = new System.Drawing.Point(39, 71);
+            this.cbUniform.Name = "cbUniform";
+            this.cbUniform.Size = new System.Drawing.Size(150, 17);
+            this.cbUniform.TabIndex = 2;
+            this.cbUniform.Text = "Use Uniform Normalization";
+            this.cbUniform.UseVisualStyleBackColor = true;
             // 
             // cbGaussian
             // 
@@ -597,17 +596,18 @@
             this.cbGaussian.Text = "Use Gaussian Normalization";
             this.cbGaussian.UseVisualStyleBackColor = true;
             // 
-            // cbUniform
+            // cbRelevanceFeedback
             // 
-            this.cbUniform.AutoSize = true;
-            this.cbUniform.Checked = true;
-            this.cbUniform.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbUniform.Location = new System.Drawing.Point(39, 71);
-            this.cbUniform.Name = "cbUniform";
-            this.cbUniform.Size = new System.Drawing.Size(150, 17);
-            this.cbUniform.TabIndex = 2;
-            this.cbUniform.Text = "Use Uniform Normalization";
-            this.cbUniform.UseVisualStyleBackColor = true;
+            this.cbRelevanceFeedback.AutoSize = true;
+            this.cbRelevanceFeedback.Checked = true;
+            this.cbRelevanceFeedback.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbRelevanceFeedback.Location = new System.Drawing.Point(39, 15);
+            this.cbRelevanceFeedback.Name = "cbRelevanceFeedback";
+            this.cbRelevanceFeedback.Size = new System.Drawing.Size(151, 17);
+            this.cbRelevanceFeedback.TabIndex = 0;
+            this.cbRelevanceFeedback.Text = "Use Relevance Feedback";
+            this.cbRelevanceFeedback.UseVisualStyleBackColor = true;
+            this.cbRelevanceFeedback.CheckedChanged += new System.EventHandler(this.cbRelevanceFeedback_CheckedChanged);
             // 
             // ResultofSearch
             // 
