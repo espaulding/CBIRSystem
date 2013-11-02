@@ -583,6 +583,7 @@
             this.cbUniform.TabIndex = 2;
             this.cbUniform.Text = "Use Uniform Normalization";
             this.cbUniform.UseVisualStyleBackColor = true;
+            this.cbUniform.CheckedChanged += new System.EventHandler(this.cbUniform_CheckedChanged);
             // 
             // cbGaussian
             // 
@@ -595,6 +596,7 @@
             this.cbGaussian.TabIndex = 1;
             this.cbGaussian.Text = "Use Gaussian Normalization";
             this.cbGaussian.UseVisualStyleBackColor = true;
+            this.cbGaussian.CheckedChanged += new System.EventHandler(this.cbGaussian_CheckedChanged);
             // 
             // cbRelevanceFeedback
             // 

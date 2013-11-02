@@ -140,13 +140,14 @@ namespace CBIR {
         }
 
         //set program to use manhattan distance function
-        private void rbDistFunction_CheckedChanged(object sender, EventArgs e) {
+        private void rbDistFunction_CheckedChanged(object sender, EventArgs e) {     
             RadioButton rb = (RadioButton)sender;
             if (rb.Name.Equals("rbManhattan")) {
                 distanceFunc = 1; //P == 1 is manhattan dist
             } else {
                 distanceFunc = 2; //P == 2 is euclidean dist
             }
+            if (!btnSearch.Enabled) { return; } //searching isn't allowed right now
             btnSearch_Click(sender, e);
         }
 
@@ -155,6 +156,18 @@ namespace CBIR {
             InitNewSearch();
             if (cbRelevanceFeedback.Checked) {
                 MessageBox.Show("Left click the images to toggle relevance.\nGreen bordered images are relevant.\nRed bordered images are not relevant.");
+            }
+        }
+
+        private void cbGaussian_CheckedChanged(object sender, EventArgs e) {
+            if (cbGaussian.Checked) {
+                cbUniform.Checked = false;
+            }
+        }
+
+        private void cbUniform_CheckedChanged(object sender, EventArgs e) {
+            if (cbUniform.Checked) {
+                cbGaussian.Checked = false;
             }
         }
 
@@ -282,5 +295,7 @@ namespace CBIR {
         #endregion //Gallery
 
         #endregion //FormAndControlEvents 
+
+       
     }
 }
