@@ -7,3 +7,12 @@ C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.ResultofSearch.reso
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIRSystem.csproj.GenerateResource.Cache
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.exe
 C:\Users\murikumo\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.pdb
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.exe
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.pdb
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\bin\Release\CBIR.exe
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\bin\Release\CBIR.pdb
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.frmDisplayPicture.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.frmSearch.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.Properties.Resources.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIR.ResultofSearch.resources
+C:\Users\Eric\Dropbox\GitHub\CBIRSystem\obj\Release\CBIRSystem.csproj.GenerateResource.Cache
