@@ -6,6 +6,9 @@ The goal of this project was to make a very simple search engine for images, usi
 References
 ----------
 
-Müller, H., Müller, W., Marchand-Maillet, S., Pun, T. and Squire, D.M., 2000. Strategies for Positive and Negative Relevance Feedback in Image Retrieval. In IN PROCEEDINGS OF THE 15TH INTERNATIONAL CONFERENCE ON PATTERN RECOGNITION (ICPR 2000. IEEE, pp. 1043–1046.
+Müller, H., Müller, W., Marchand-Maillet, S., Pun, T. and Squire, D.M., 2000. Strategies for
+     Positive and Negative Relevance Feedback in Image Retrieval. In IN PROCEEDINGS OF THE
+     15TH INTERNATIONAL CONFERENCE ON PATTERN RECOGNITION (ICPR 2000. IEEE, pp. 1043–1046.
 
-Rui, Y., Huang, T.S., Ortega, M. and Mehrotra, S., 1998. Relevance Feedback: A Power Tool for Interactive Content-Based Image Retrieval,
+Rui, Y., Huang, T.S., Ortega, M. and Mehrotra, S., 1998. Relevance Feedback: A Power Tool for
+     Interactive Content-Based Image Retrieval,
