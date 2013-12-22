@@ -3,6 +3,8 @@ CBIRSystem
 This was a class project designed by Professor Min Chen. 
 The goal of this project was to make a very simple search engine for images, using no textual meta data whatsoever. Later stages of the project added user interaction in the form of Relevance Feedback, which was a simplified form of what is described in [Rui et al. 1998]. I also read another article for a broader perspective, but only ended up using techniques described in the classroom lectures [Müller et al. 2000].
 
+For the convience of the end user, image features are saved in a raw format using .NET binary file serialization; however, these features are always normalized prior to any statisical analysis or image retrieval.
+
 References
 ----------
 
